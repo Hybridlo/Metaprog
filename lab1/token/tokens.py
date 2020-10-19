@@ -1,4 +1,5 @@
 from functools import partial
+from .automaton_matching import integer_match, double_match, identifier_match
 
 def match(*args):                       #check if input matches any possible matches, checks as many chars as the input text
     text = args[-1]
