@@ -5,7 +5,7 @@ def match(*args):                       #check if input matches any possible mat
     text = args[-1]
     text_l = len(text)
     for matching in args[:-1]:
-        if matching[:text_l] == text_l:
+        if matching[:text_l] == text:
             return True
 
     return False
@@ -25,12 +25,16 @@ def comment_match(input):
 
         return None             #not closed
 
+    return False                #not matched
+
 def doc_match(input):
     if match("/**", input):
         if input[-2:] == "*/":
             return True         #full match
 
         return None             #not closed
+
+    return False                #not matched
 
 def string_match(input):
     #string input using ""
@@ -47,6 +51,8 @@ def string_match(input):
             return True         #full match
 
         return None             #not closed
+
+    return False                #not matched
 
 
 tokens = {
@@ -162,7 +168,7 @@ tokens = {
     "T_SR_EQUAL": partial(match, ">>="),
     "T_START_HEREDOC": partial(match, "<<<"),
     "T_STATIC": partial(match, "static"),
-    "T_STRING": identifier_match,               #<- important
+    "T_STRING": identifier_match,
     "T_STRING_CAST": partial(match, "(string)"),
     "T_SWITCH": partial(match, "switch"),
     "T_THROW": partial(match, "throw"),

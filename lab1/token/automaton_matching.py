@@ -27,7 +27,7 @@ def build_integer_automaton():
     digit_state.add_transition(underscore_divisor_state, "_")
 
     #int doesn't end with underscore
-    underscore_divisor_state(digit_state, string.digits)
+    underscore_divisor_state.add_transition(digit_state, string.digits)
 
     return int_start_state
 
@@ -54,7 +54,10 @@ def build_identifier_automaton():
 
     #also allow bytes from 128 to 255
     for i in range(128, 256):
-        allowed_first_symbols += i.to_bytes(1, "big").decode("cp1252")
+        try:
+            allowed_first_symbols += i.to_bytes(1, "big").decode("cp1252")
+        except UnicodeDecodeError:
+            pass            #skip if not decodable
 
     identifier_start_state.add_transition(first_symbol_state, allowed_first_symbols)
 
@@ -64,6 +67,10 @@ def build_identifier_automaton():
 
     first_symbol_state.add_transition(other_symbols_state, allowed_other_symbols)
 
+    other_symbols_state.add_transition(other_symbols_state, allowed_other_symbols)
+
+    return identifier_start_state
+
 integer_automaton_start = build_integer_automaton()
 double_automaton_start = build_double_automaton()
 identifier_automaton_start = build_identifier_automaton()
@@ -71,6 +78,9 @@ identifier_automaton_start = build_identifier_automaton()
 def match_against_automaton(input, state):
     for symbol in input:
         state = state.transition(symbol)
+
+        if state == None:
+            return False
 
     return state.is_finishing
 
