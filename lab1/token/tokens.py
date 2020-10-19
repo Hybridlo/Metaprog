@@ -1,7 +1,52 @@
 from functools import partial
 
-def match(*args):
-    pass
+def match(*args):                       #check if input matches any possible matches, checks as many chars as the input text
+    text = args[-1]
+    text_l = len(text)
+    for matching in args[:-1]:
+        if matching[:text_l] == text_l:
+            return True
+
+    return False
+
+def comment_match(input):
+    #multiline comment
+    if match("/*", input):
+        if input[-2:] == "*/":
+            return True         #full match
+
+        return None             #not closed
+
+    #C-type or Unix-type single line comment
+    if match("//", input) or match("#", input):
+        if input[-2:] == "\n":
+            return True         #full match
+
+        return None             #not closed
+
+def doc_match(input):
+    if match("/**", input):
+        if input[-2:] == "*/":
+            return True         #full match
+
+        return None             #not closed
+
+def string_match(input):
+    #string input using ""
+    if match("\"", input):
+        if input[-1:] == "\"" and input[-2:] != "\\\"":
+            return True         #full match
+
+        return None             #not closed
+
+    
+    #string input using ''
+    if match("\'", input):
+        if input[-1:] == "\'" and input[-2:] != "\\\'":
+            return True         #full match
+
+        return None             #not closed
+
 
 tokens = {
     "T_ABSTRACT": partial(match, "abstract"),
@@ -27,7 +72,6 @@ tokens = {
     "T_CONST": partial(match, "const"),
     "T_CONSTANT_ENCAPSED_STRING": string_match,
     "T_CONTINUE": partial(match, "continue"),
-    "T_CURLY_OPEN": partial(match, "{$"),
     "T_DEC": partial(match, "--"),
     "T_DECLARE": partial(match, "declare"),
     "T_DEFAULT": partial(match, "default"),
@@ -36,7 +80,6 @@ tokens = {
     "T_DNUMBER": double_match,
     "T_DO": partial(match, "do"),
     "T_DOC_COMMENT": doc_match,
-    "T_DOLLAR_OPEN_CURLY_BRACES": partial(match, "${"),
     "T_DOUBLE_ARROW": partial(match, "=>"),
     "T_DOUBLE_CAST": partial(match, "(real)", "(double)", "(float)"),
     "T_DOUBLE_COLON": partial(match, "::"),
@@ -45,7 +88,6 @@ tokens = {
     "T_ELSE": partial(match, "else"),
     "T_ELSEIF": partial(match, "elseif"),
     "T_EMPTY": partial(match, "empty"),
-    "T_ENCAPSED_AND_WHITESPACE": partial(match, " $a"),
     "T_ENDDECLARE": partial(match, "enddeclare"),
     "T_ENDFOR": partial(match, "endfor"),
     "T_ENDFOREACH": partial(match, "endforeach"),
@@ -96,7 +138,6 @@ tokens = {
     "T_NEW": partial(match, "new"),
     "T_NS_C": partial(match, "__NAMESPACE__"),
     "T_NS_SEPARATOR": partial(match, "\\"),
-    "T_NUM_STRING": num_string_match,
     "T_OBJECT_CAST": partial(match, "(object)"),
     "T_OBJECT_OPERATOR": partial(match, "->"),
     "T_OPEN_TAG": partial(match, "<?php", "<?", "<%"),
@@ -122,7 +163,6 @@ tokens = {
     "T_STATIC": partial(match, "static"),
     "T_STRING": identifier_match,               #<- important
     "T_STRING_CAST": partial(match, "(string)"),
-    "T_STRING_VARNAME": lambda input: match("${", input[:2]) and identifier_match(input[2:]),
     "T_SWITCH": partial(match, "switch"),
     "T_THROW": partial(match, "throw"),
     "T_TRAIT": partial(match, "trait"),
