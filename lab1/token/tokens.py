@@ -6,9 +6,12 @@ def match(*args):                       #check if input matches any possible mat
     text_l = len(text)
     for matching in args[:-1]:
         if matching[:text_l] == text:
-            return True
+            if text_l == len(matching):
+                return True     #full match
 
-    return False
+            return None         #not closed
+
+    return False                #not matched
 
 def comment_match(input):
     #multiline comment
@@ -181,7 +184,6 @@ tokens = {
     "T_VAR": partial(match, "var"),
     "T_VARIABLE": lambda input: match("$", input[:1]) and identifier_match(input[1:]),
     "T_WHILE": partial(match, "while"),
-    "T_WHITESPACE": partial(match, " ", "\t", "\n", "\r"),
     "T_XOR_EQUAL": partial(match, "^="),
     "T_YIELD": partial(match, "yield"),
     "T_YIELD_FROM": partial(match, "yield from"),
