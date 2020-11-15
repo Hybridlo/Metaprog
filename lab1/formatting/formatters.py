@@ -71,7 +71,7 @@ def func_call_paretheses(tokens, curr_token_index, config):
 
     return res
 
-def token_and_parentheses(config_key, interest_token, tokens, curr_token_index, config):
+def _token_and_parentheses(config_key, interest_token, tokens, curr_token_index, config):
     """Puts space between token of interest 
     and paretheses if flag in config_key is set to True"""
 
@@ -84,10 +84,58 @@ def token_and_parentheses(config_key, interest_token, tokens, curr_token_index, 
 
     return res
 
-anon_func_paretheses = partial(token_and_parentheses, "Anonymous function parenteses", "T_FUNCTION")
-if_parentheses = partial(token_and_parentheses, "'if' parenteses", "T_IF")
-for_parentheses = partial(token_and_parentheses, "'for' parenteses", "T_FOR")
-while_parentheses = partial(token_and_parentheses, "'while' parenteses", "T_WHILE")
-switch_parentheses = partial(token_and_parentheses, "'switch' parenteses", "T_SWITCH")
-catch_parentheses = partial(token_and_parentheses, "'catch' parenteses", "T_CATCH")
-array_init_paretheses = partial(token_and_parentheses, "Array initializer parentheses", "T_ARRAY")
+anon_func_paretheses = partial(_token_and_parentheses, "Anonymous function parenteses", "T_FUNCTION")
+if_parentheses = partial(_token_and_parentheses, "'if' parenteses", "T_IF")
+for_parentheses = partial(_token_and_parentheses, "'for' parenteses", "T_FOR")
+while_parentheses = partial(_token_and_parentheses, "'while' parenteses", "T_WHILE")
+switch_parentheses = partial(_token_and_parentheses, "'switch' parenteses", "T_SWITCH")
+catch_parentheses = partial(_token_and_parentheses, "'catch' parenteses", "T_CATCH")
+array_init_paretheses = partial(_token_and_parentheses, "Array initializer parentheses", "T_ARRAY")
+
+#Spaces around operators
+def _around_token(config_key, interest_tokens, tokens, curr_token_index, config):
+    """Puts spaces around token of interest 
+    if flag in config_key is set to True"""
+
+    res = {"before": "", "after": ""}
+
+    if config["Spaces"][config_key] == "True" and tokens[curr_token_index] in interest_tokens:
+        res["after"] += " "
+        res["before"] += " "
+
+    return res
+
+assign_operators = partial(_around_token, "Assignment operators (=, +=, ...)",
+                           [
+                               "EQUAL", "T_AND_EQUAL", "T_DOUBLE_ARROW", "T_COALESCE_EQUAL", "T_CONCAT_EQUAL",
+                               "T_DIV_EQUAL", "T_DOUBLE_ARROW", "T_OR_EQUAL", "T_PLUS_EQUAL", "T_POW_EQUAL",
+                               "T_SL_EQUAL", "T_SR_EQUAL", "T_XOR_EQUAL"
+                           ]
+                          )
+logical_operators = partial(_around_token, "Logical operators (&&, ||)", ["T_BOOLEAN_AND", "T_BOOLEAN_OR"])
+equality_operators = partial(_around_token, "Equality operators (==, !=)", ["T_IS_EQUAL", "T_IS_IDENTICAL", "T_IS_NOT_EQUAL", "T_IS_NOT_IDENTICAL"])
+relational_operators = partial(_around_token, "Relational operators (<, >, <=, >=, <=>)",
+                                ["LESS_THAN", "MORE_THAN", "T_IS_GREATER_OR_EQUAL", "T_IS_SMALLER_OR_EQUAL", "T_SPACESHIP"]
+                              )
+bitwise_operators = partial(_around_token, "Bitwise operators (&, |, ^)", ["BITWISE_OR", "BITWISE_AND", "BITWISE_XOR"])
+additive_operators = partial(_around_token, "Additive operators (+, -)", ["PLUS", "MINUS"])
+multiplicative_operators = partial(_around_token, "Multiplicative operators (*, /, %, **)", ["MULTIPLY", "MODULO", "DIVIDE", "T_POW"])
+shift_operators = partial(_around_token, "Shift operators (<<, >>)", ["T_SL", "T_SR"])
+unary_operators = partial(_around_token, "Unary additive operators (+, -, ++, --)", ["UNARY_PLUS", "UNARY_MINUS", "T_DEC", "T_INC"])
+concat_operator = partial(_around_token, "Concatenation (.)", ["DOT"])
+obj_access_operator = partial(_around_token, "Object access operator (->)", ["T_OBJECT_OPERATOR"])
+null_coal_operator = partial(_around_token, "Null coalescing operator (??)", ["T_COALESCE"])
+null_coal_operator = partial(_around_token, "Null coalescing operator (??)", ["T_COALESCE"])
+
+def assignment_in_declare(tokens, curr_token_index, config):
+    """Puts spaces around assignment in declare construct 
+    if flag in config_key is set to True"""
+
+    res = {"before": "", "after": ""}
+
+    if (config["Spaces"]["Assignment in declare statement"] == "True" 
+        and check_assign_in_declare(tokens, curr_token_index)):
+        res["after"] += " "
+        res["before"] += " "
+
+    return res

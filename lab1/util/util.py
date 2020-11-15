@@ -94,3 +94,23 @@ def check_if_token_before_paretheses(tokens, curr_token_index, needed_token):
         return True
 
     return False
+
+def check_assign_in_declare(tokens, curr_token_index):
+    """Check if current token is assignment
+    in declare construct; defined as next token sequence:
+    T_DECLARE, R_PARENTHESES_OPEN, T_STRING, EQUAL"""
+
+    if curr_token_index < 3:
+        return False
+
+    curr_token = tokens[curr_token_index]
+    prev_token_1 = tokens[curr_token_index-1]
+    prev_token_2 = tokens[curr_token_index-2]
+    prev_token_3 = tokens[curr_token_index-3]
+
+    if (prev_token_3 == "T_DECLARE" and prev_token_2 == "R_PARENTHESES_OPEN"
+        and prev_token_1 == "T_STRING" and curr_token == "EQUAL"):
+
+        return True
+
+    return False

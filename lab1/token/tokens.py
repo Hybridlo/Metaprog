@@ -208,7 +208,13 @@ tokens = {
     "LESS_THAN": partial(match, "<"),
     "MORE_THAN": partial(match, ">"),
     "MINUS": partial(match, "-"),
-    "PLUS": partial(match, "+")
+    "PLUS": partial(match, "+"),
+    "BITWISE_OR": partial(match, "|"),
+    "BITWISE_AND": partial(match, "&"),
+    "BITWISE_XOR": partial(match, "^"),
+    "MULTIPLY": partial(match, "*"),
+    "DIVIDE": partial(match, "/"),
+    "MODULO": partial(match, "%"),
 }
 
 def detect_token(to_check):
