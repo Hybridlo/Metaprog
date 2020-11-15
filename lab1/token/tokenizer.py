@@ -1,5 +1,4 @@
 from .tokens import detect_token
-import time
 
 class Token:
     """A class to hold token information"""
