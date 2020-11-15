@@ -190,3 +190,21 @@ switch_left_brace = partial(_left_brace_after_token, "'switch' left brace", "T_S
 try_left_brace = partial(_left_brace_after_token, "'try' left brace", "T_TRY")
 catch_left_brace = partial(_left_brace_after_token, "'catch' left brace", "T_CATCH")
 finally_left_brace = partial(_left_brace_after_token, "'finally' left brace", "T_FINALLY")
+
+#Spaces before keywords
+def _before_token(config_key, interest_token, tokens, curr_token_index, config):
+    """Puts space before specified token
+    if flag in config_key is set to True"""
+
+    res = {"before": "", "after": ""}
+
+    if (config["Spaces"][config_key] == "True" and tokens[curr_token_index] == interest_token):
+        res["before"] += " "
+
+    return res
+
+
+before_else = partial(_before_token, "'else' keyword", "T_ELSE")
+before_while = partial(_before_token, "'while' keyword", "T_WHILE")
+before_catch = partial(_before_token, "'catch' keyword", "T_CATCH")
+before_finally = partial(_before_token, "'finally' keyword", "T_FINALLY")
