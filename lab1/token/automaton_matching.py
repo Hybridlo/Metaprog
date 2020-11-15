@@ -13,10 +13,18 @@ class State:
             if symbol in k:
                 return v
 
-def build_integer_automaton():
+def build_integer_automaton(with_minus=True):
     int_start_state = State()           #initial state
     digit_state = State(True)           #input_is_digit state
     underscore_divisor_state = State()  #allow dividing integers like 1_000_000
+
+    if with_minus:
+        minus_state = State()               #starting integer with - state
+
+        int_start_state.add_transition(minus_state, "-")
+
+        #only one - allowed, numbers after it only
+        minus_state.add_transition(digit_state, string.digits)
 
     int_start_state.add_transition(digit_state, string.digits)
 
@@ -40,7 +48,7 @@ def build_double_automaton():
 
     before_dot_digit_state.add_transition(dot_state, ".")
 
-    temp = build_integer_automaton()                                #another integer needed after the dot
+    temp = build_integer_automaton(False)                           #another integer needed after the dot, no - allowed
     after_dot_digit_state = temp.transition("0")                    #get digit_state of integer
     dot_state.add_transition(after_dot_digit_state, string.digits)  #set transition to final state from dot state
 

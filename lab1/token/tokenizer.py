@@ -33,6 +33,15 @@ def check_newline(to_check):
 
     return False
 
+def scan_newlines_in_token(to_check):       #account for newlines in comments and strings
+    amount = 0
+
+    for letter in to_check:
+        if check_newline(letter):
+            amount += 1
+
+    return amount
+
 def check_parentesis(to_check, counters):
     """function to track parentesis"""
     if to_check == "(":
@@ -84,11 +93,11 @@ def tokenize(file_str):
                     position[1] += 1
                     break
 
-                if check_newline(str_to_take):          #if newline - account for position and skip
-                    file_str = file_str[i:]
-                    position[0] += 1
-                    position[1] = 1
-                    break
+            if check_newline(str_to_take):          #if newline - account for position and skip
+                file_str = file_str[i:]
+                position[0] += 1
+                position[1] = 1
+                break
 
             res = detect_token(str_to_take)
 
@@ -103,7 +112,14 @@ def tokenize(file_str):
                     res_tokens.append(Token(res["true"][0], str_to_take, tuple(position)))
                     position[1] += len(str_to_take)
                     file_str = file_str[len(str_to_take):]
+
                     check_parentesis(str_to_take, counters)
+
+                    shift = scan_newlines_in_token(str_to_take)
+                    if shift > 0:
+                        position[0] += shift
+                        position[1] = 1
+
                     break
 
                 else:           #case - 1 full token match, but may match another token, if scanned more
@@ -120,9 +136,18 @@ def tokenize(file_str):
                         res_tokens.append(Token(found_true, found_true_str, tuple(position)))
                         position[1] += len(found_true_str)
                         file_str = file_str[len(found_true_str):]
+
                         check_parentesis(found_true_str, counters)
+
+                        shift = scan_newlines_in_token(str_to_take)
+                        if shift > 0:
+                            position[0] += shift
+                            position[1] = 1
+
                         break
 
+                    print("lal")
+                    print(str_to_take)
                     errors.append(f"Unidentified token at ({position[0]}, {position[1]})")
                     file_str = file_str[len(str_to_take)-1:]        #discard unidentified token
                     break

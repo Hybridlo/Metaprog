@@ -18,14 +18,14 @@ def match(*args):
 def comment_match(input):
     """comment matcher"""
 
-    if input[:2] == "/*":
+    if input[:2] == "/*"[:len(input)]:
         if input[-2:] == "*/":
             return True         #full match
 
         return None             #not closed
 
     #C-type or Unix-type single line comment
-    if input[:2] == "//" or input[0] == "#":
+    if input[:2] == "//"[:len(input)] or input[0] == "#":
         if input[-1:] == "\n":
             return True         #full match
 
@@ -35,8 +35,7 @@ def comment_match(input):
 
 def doc_match(input):
     """doc-string matcher"""
-
-    if match("/**", input):
+    if input[:3] == "/**"[:len(input)]:
         if input[-2:] == "*/":
             return True         #full match
 
@@ -203,7 +202,13 @@ tokens = {
     "SEMICOLON": partial(match, ";"),
     "COMMA": partial(match, ","),
     "DOT": partial(match, "."),
-    "EQUAL": partial(match, "=")
+    "EQUAL": partial(match, "="),
+    "Q_MARK": partial(match, "?"),
+    "COLON": partial(match, ":"),
+    "LESS_THAN": partial(match, "<"),
+    "MORE_THAN": partial(match, ">"),
+    "MINUS": partial(match, "-"),
+    "PLUS": partial(match, "+")
 }
 
 def detect_token(to_check):
@@ -237,5 +242,8 @@ def detect_token(to_check):
 
     if len(gave_true) == 2 and "T_STRING" in gave_true:
         gave_true.remove("T_STRING")        #special case - T_STRING is any identifier, will collide with any keyword
+
+    if len(gave_true) == 2 and "T_DOC_COMMENT" in gave_true:    #another collision
+        gave_true.remove("T_COMMENT")
 
     return {"true": gave_true, "none": gave_none}
