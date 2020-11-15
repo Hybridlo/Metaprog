@@ -1,5 +1,4 @@
 import configparser
-import sys
 
 configs_folder = "..\\option_templates\\"
 
@@ -10,5 +9,3 @@ class Options:
         print(config.sections())
 
         self.config = config
-
-op = Options("default")
