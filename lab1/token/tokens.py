@@ -1,7 +1,9 @@
 from functools import partial
 from .automaton_matching import integer_match, double_match, identifier_match
 
-def match(*args):                       #check if input matches any possible matches, checks as many chars as the input text
+def match(*args):
+    """check if input matches any possible matches, checks as many chars as the input text"""
+
     text = args[-1]
     text_l = len(text)
     for matching in args[:-1]:
@@ -14,7 +16,8 @@ def match(*args):                       #check if input matches any possible mat
     return False                #not matched
 
 def comment_match(input):
-    #multiline comment
+    """multiline comment matcher"""
+
     if match("/*", input):
         if input[-2:] == "*/":
             return True         #full match
@@ -31,6 +34,8 @@ def comment_match(input):
     return False                #not matched
 
 def doc_match(input):
+    """doc-string matcher"""
+
     if match("/**", input):
         if input[-2:] == "*/":
             return True         #full match
@@ -40,6 +45,8 @@ def doc_match(input):
     return False                #not matched
 
 def string_match(input):
+    """usual string matcher"""
+
     #string input using ""
     if match("\"", input):
         if input[-1:] == "\"" and input[-2:] != "\\\"":
@@ -188,3 +195,31 @@ tokens = {
     "T_YIELD": partial(match, "yield"),
     "T_YIELD_FROM": partial(match, "yield from"),
 }
+
+def detect_token(to_check):
+    """
+    function that uses existing tokens dictionary
+    and tries to match input string using matcher
+    functions, that are provided as values in
+    tokens dictionary
+
+    to_check: string that is being tokenized
+    """
+
+    gave_true = []
+    gave_none = []
+
+    for token, matcher in tokens.items():
+        res = matcher(to_check)
+
+        if res != False:
+            if res == True:
+                gave_true.append(token)
+
+            elif res == None:
+                gave_none.append(token)
+
+    if len(gave_true) == 2 and "T_STRING" in gave_true:
+        gave_true.remove("T_STRING")        #special case - T_STRING is any identifier, will collide with any keyword
+
+    return {"true": gave_true, "none": gave_none}
