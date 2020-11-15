@@ -42,8 +42,8 @@ def scan_newlines_in_token(to_check):       #account for newlines in comments an
 
     return amount
 
-def check_parenteses(to_check, counters):
-    """function to track parenteses"""
+def check_parentheses(to_check, counters):
+    """function to track parentheses"""
     if to_check == "(":
         counters["round"] += 1
 
@@ -113,7 +113,7 @@ def tokenize(file_str):
                     position[1] += len(str_to_take)
                     file_str = file_str[len(str_to_take):]
 
-                    check_parenteses(str_to_take, counters)
+                    check_parentheses(str_to_take, counters)
 
                     shift = scan_newlines_in_token(str_to_take)
                     if shift > 0:
@@ -137,7 +137,7 @@ def tokenize(file_str):
                         position[1] += len(found_true_str)
                         file_str = file_str[len(found_true_str):]
 
-                        check_parenteses(found_true_str, counters)
+                        check_parentheses(found_true_str, counters)
 
                         shift = scan_newlines_in_token(str_to_take)
                         if shift > 0:
@@ -154,7 +154,7 @@ def tokenize(file_str):
 
     for key in counters:
         if counters[key] != 0:
-            errors.append("Unclosed brakets/parenteses found")
+            errors.append("Unclosed brakets/parentheses found")
             break
 
     return res_tokens, errors
