@@ -284,3 +284,20 @@ def check_if_right_parentheses_after_token(tokens, curr_token_index, needed_toke
             return True
 
         return False    #invalid token found with parentheses closed
+
+def check_if_colon_in_ternary(tokens, curr_token_index):
+    """Check if current token is a colon in ternary operator"""
+    if tokens[curr_token_index] != "COLON":
+        return False
+
+    i = curr_token_index - 1
+
+    while True:
+        if i < 0:
+            return False
+
+        if tokens[i] == "SEMICOLON":
+            return False    #didn't find matching ?
+
+        if tokens[i] == "Q_MARK":
+            return True

@@ -305,3 +305,68 @@ def in_php_tags(tokens, curr_token_index, config):
             res["before"] += " "
 
     return res
+
+#In ternary operator
+def before_question(tokens, curr_token_index, config):
+    """Puts space before ? in ternary operator
+    if flag is set to True"""
+
+    res = {"before": "", "after": ""}
+
+    if config["Spaces"]["Before '?'"] == "True":
+        if tokens[curr_token_index] == "Q_MARK":
+            res["before"] += " "
+
+    return res
+
+def after_question(tokens, curr_token_index, config):
+    """Puts space after ? in ternary operator
+    if flag is set to True"""
+
+    res = {"before": "", "after": ""}
+
+    if config["Spaces"]["After '?'"] == "True":
+        if tokens[curr_token_index] == "Q_MARK":
+            res["after"] += " "
+
+    return res
+
+def before_colon_ternary(tokens, curr_token_index, config):
+    """Puts space before : in ternary operator
+    if flag is set to True"""
+
+    res = {"before": "", "after": ""}
+
+    if config["Spaces"]["Before ':'"] == "True":
+        if check_if_colon_in_ternary(tokens, curr_token_index):
+            res["before"] += " "
+
+    return res
+
+def after_colon_ternary(tokens, curr_token_index, config):
+    """Puts space after : in ternary operator
+    if flag is set to True"""
+
+    res = {"before": "", "after": ""}
+
+    if config["Spaces"]["After ':'"] == "True":
+        if check_if_colon_in_ternary(tokens, curr_token_index):
+            res["after"] += " "
+
+    return res
+
+def between_question_and_colon(tokens, curr_token_index, config):
+    """Puts space after between ?:
+    if flag is set to True"""
+
+    res = {"before": "", "after": ""}
+
+    if curr_token_index - 1 == len(tokens):
+        return res
+
+    if config["Spaces"]["After '?'"] == "True":
+        if tokens[curr_token_index] == "Q_MARK":
+            if tokens[curr_token_index+1] == "COLON":
+                res["after"] += " "
+
+    return res
