@@ -84,13 +84,13 @@ def _token_and_parentheses(config_key, interest_token, tokens, curr_token_index,
 
     return res
 
-anon_func_paretheses = partial(_token_and_parentheses, "Anonymous function parenteses", "T_FUNCTION")
-if_parentheses = partial(_token_and_parentheses, "'if' parenteses", "T_IF")
-for_parentheses = partial(_token_and_parentheses, "'for' parenteses", "T_FOR")
-while_parentheses = partial(_token_and_parentheses, "'while' parenteses", "T_WHILE")
-switch_parentheses = partial(_token_and_parentheses, "'switch' parenteses", "T_SWITCH")
-catch_parentheses = partial(_token_and_parentheses, "'catch' parenteses", "T_CATCH")
-array_init_paretheses = partial(_token_and_parentheses, "Array initializer parentheses", "T_ARRAY")
+anon_func_paretheses = partial(_token_and_parentheses, "Anonymous function parentheses", "T_FUNCTION")
+if_parentheses = partial(_token_and_parentheses, "'if' parentheses", "T_IF")
+for_parentheses = partial(_token_and_parentheses, "'for' parentheses", "T_FOR")
+while_parentheses = partial(_token_and_parentheses, "'while' parentheses", "T_WHILE")
+switch_parentheses = partial(_token_and_parentheses, "'switch' parentheses", "T_SWITCH")
+catch_parentheses = partial(_token_and_parentheses, "'catch' parentheses", "T_CATCH")
+array_init_parentheses = partial(_token_and_parentheses, "Array initializer parentheses", "T_ARRAY")
 
 #Spaces around operators
 def _around_token(config_key, interest_tokens, tokens, curr_token_index, config):
@@ -139,3 +139,54 @@ def assignment_in_declare(tokens, curr_token_index, config):
         res["before"] += " "
 
     return res
+
+#Space before left brace
+def class_declaration_left_brace(tokens, curr_token_index, config):
+    """Puts space before left brace in class declaration
+    if flag in config_key is set to True"""
+
+    res = {"before": "", "after": ""}
+
+    if (config["Spaces"]["Class left brace"] == "True" 
+        and check_class_declaration(tokens, curr_token_index)):
+        res["before"] += " "
+
+    return res
+
+def func_declaration_left_brace(tokens, curr_token_index, config):
+    """Puts space before left brace in function declaration
+    if flag in config_key is set to True"""
+
+    res = {"before": "", "after": ""}
+
+    if (config["Spaces"]["Function left brace"] == "True" 
+        and check_function_declaration(tokens, curr_token_index)):
+        res["before"] += " "
+
+    return res
+
+def _left_brace_after_token(config_key, interest_token, tokens, curr_token_index, config):
+    """Puts space before left brace
+    that follows interest_token and
+    if flag in config_key is set to True;
+    this function skips some other tokens in between"""
+
+    res = {"before": "", "after": ""}
+
+    if (config["Spaces"][config_key] == "True" 
+        and check_left_brace_after_token(tokens, curr_token_index, interest_token)):
+
+        res["before"] += " "
+
+    return res
+
+if_left_brace = partial(_left_brace_after_token, "'if' left brace", "T_IF")
+else_left_brace = partial(_left_brace_after_token, "'else' left brace", "T_ELSE")
+elseif_left_brace = partial(_left_brace_after_token, "'else' left brace", "T_ELSEIF")     #share one rule
+for_left_brace = partial(_left_brace_after_token, "'for' left brace", "T_FOR")
+while_left_brace = partial(_left_brace_after_token, "'while' left brace", "T_WHILE")
+do_left_brace = partial(_left_brace_after_token, "'do' left brace", "T_DO")
+switch_left_brace = partial(_left_brace_after_token, "'switch' left brace", "T_SWITCH")
+try_left_brace = partial(_left_brace_after_token, "'try' left brace", "T_TRY")
+catch_left_brace = partial(_left_brace_after_token, "'catch' left brace", "T_CATCH")
+finally_left_brace = partial(_left_brace_after_token, "'finally' left brace", "T_FINALLY")
