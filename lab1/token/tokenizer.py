@@ -1,4 +1,5 @@
 from .tokens import detect_token
+import time
 
 class Token:
     """A class to hold token information"""
@@ -127,8 +128,8 @@ def tokenize(file_str):
                     break
 
     for key in counters:
-        if counters[key] > 0:
+        if counters[key] != 0:
             errors.append("Unclosed brakets/parentesis found")
             break
 
-    return res_tokens
+    return res_tokens, errors

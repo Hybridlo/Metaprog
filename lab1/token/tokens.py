@@ -16,17 +16,17 @@ def match(*args):
     return False                #not matched
 
 def comment_match(input):
-    """multiline comment matcher"""
+    """comment matcher"""
 
-    if match("/*", input):
+    if input[:2] == "/*":
         if input[-2:] == "*/":
             return True         #full match
 
         return None             #not closed
 
     #C-type or Unix-type single line comment
-    if match("//", input) or match("#", input):
-        if input[-2:] == "\n":
+    if input[:2] == "//" or input[0] == "#":
+        if input[-1:] == "\n":
             return True         #full match
 
         return None             #not closed
@@ -48,16 +48,16 @@ def string_match(input):
     """usual string matcher"""
 
     #string input using ""
-    if match("\"", input):
-        if input[-1:] == "\"" and input[-2:] != "\\\"":
+    if input[0] == "\"":
+        if len(input) > 1 and input[-1:] == "\"" and input[-2:] != "\\\"":
             return True         #full match
 
         return None             #not closed
 
     
     #string input using ''
-    if match("\'", input):
-        if input[-1:] == "\'" and input[-2:] != "\\\'":
+    if input[0] == "\'":
+        if len(input) > 1 and input[-1:] == "\'" and input[-2:] != "\\\'":
             return True         #full match
 
         return None             #not closed
@@ -194,6 +194,16 @@ tokens = {
     "T_XOR_EQUAL": partial(match, "^="),
     "T_YIELD": partial(match, "yield"),
     "T_YIELD_FROM": partial(match, "yield from"),
+    "R_PARENTESIS_OPEN": partial(match, "("),
+    "R_PARENTESIS_CLOSE": partial(match, ")"),
+    "S_PARENTESIS_OPEN": partial(match, "["),
+    "S_PARENTESIS": partial(match, "]"),
+    "BRACKET_OPEN": partial(match, "{"),
+    "BRACKET_CLOSE": partial(match, "}"),
+    "SEMICOLON": partial(match, ";"),
+    "COMMA": partial(match, ","),
+    "DOT": partial(match, "."),
+    "EQUAL": partial(match, "=")
 }
 
 def detect_token(to_check):
@@ -218,6 +228,12 @@ def detect_token(to_check):
 
             elif res == None:
                 gave_none.append(token)
+
+    questionable = ["T_STRING", "T_VARIABLE", "T_LNUMBER", "T_DNUMBER"]
+
+    for possible_token in gave_true:
+        if possible_token in questionable:
+            gave_none.append(possible_token)    #questionable tokens have variable length, putting in none so that they're read in full
 
     if len(gave_true) == 2 and "T_STRING" in gave_true:
         gave_true.remove("T_STRING")        #special case - T_STRING is any identifier, will collide with any keyword

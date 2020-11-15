@@ -76,13 +76,20 @@ double_automaton_start = build_double_automaton()
 identifier_automaton_start = build_identifier_automaton()
 
 def match_against_automaton(input, state):
+    if len(input) == 0:
+        return True
+
     for symbol in input:
         state = state.transition(symbol)
 
         if state == None:
             return False
 
-    return state.is_finishing
+    if state != None:
+        if state.is_finishing == True:
+            return True
+        elif state.is_finishing == False:
+            return None     #to preserve logic of None = partial match
 
 integer_match = lambda input: match_against_automaton(input, integer_automaton_start)
 double_match = lambda input: match_against_automaton(input, double_automaton_start)
