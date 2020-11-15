@@ -160,7 +160,7 @@ def func_declaration_left_brace(tokens, curr_token_index, config):
     res = {"before": "", "after": ""}
 
     if (config["Spaces"]["Function left brace"] == "True" 
-        and check_function_declaration(tokens, curr_token_index)):
+        and check_function_declaration_left_brace(tokens, curr_token_index)):
         res["before"] += " "
 
     return res
@@ -208,3 +208,100 @@ before_else = partial(_before_token, "'else' keyword", "T_ELSE")
 before_while = partial(_before_token, "'while' keyword", "T_WHILE")
 before_catch = partial(_before_token, "'catch' keyword", "T_CATCH")
 before_finally = partial(_before_token, "'finally' keyword", "T_FINALLY")
+
+#Spaces within
+def in_brackets(tokens, curr_token_index, config):
+    """Puts spaces within brackets
+    if flag is set to True"""
+
+    res = {"before": "", "after": ""}
+
+    if config["Spaces"]["Brackets"] == "True":
+        if tokens[curr_token_index] == "S_PARENTHESES_OPEN":
+            res["after"] += " "
+
+        if tokens[curr_token_index] == "S_PARENTHESES_CLOSE":
+            res["before"] += " "
+
+    return res
+
+def in_func_decl_parentheses(tokens, curr_token_index, config):
+    """Puts spaces within function declaration parantheses
+    if flag is set to True"""
+
+    res = {"before": "", "after": ""}
+
+    if config["Spaces"]["Within function declaration parentheses"] == "True":
+        if check_left_brace_after_func_decl(tokens, curr_token_index):
+            res["after"] += " "
+
+        if check_right_brace_after_func_decl(tokens, curr_token_index):
+            res["before"] += " "
+
+    return res
+
+def _in_token_parentheses(config_key, interest_token, tokens, curr_token_index, config):
+    """Puts spaces within arguments
+    parantheses of specified token
+    if flag is set to True"""
+
+    res = {"before": "", "after": ""}
+
+    if config["Spaces"][config_key] == "True":
+        if check_if_left_parentheses_after_token(tokens, curr_token_index, interest_token):
+            res["after"] += " "
+
+        if check_if_right_parentheses_after_token(tokens, curr_token_index, interest_token):
+            res["before"] += " "
+
+    return res
+
+in_array_init_parentheses = partial(_in_token_parentheses, "Within array initializer parentheses", "T_ARRAY")
+in_func_call_parentheses = partial(_in_token_parentheses, "Within array initializer parentheses", "T_STRING")
+in_if_parentheses = partial(_in_token_parentheses, "Within 'if' parentheses", "T_IF")
+in_for_parentheses = partial(_in_token_parentheses, "Within 'for' parentheses", "T_FOR")
+in_while_parentheses = partial(_in_token_parentheses, "Within 'while' parentheses", "T_WHILE")
+in_switch_parentheses = partial(_in_token_parentheses, "Within 'switch' parentheses", "T_SWITCH")
+in_catch_parentheses = partial(_in_token_parentheses, "Within 'catch' parentheses", "T_CATCH")
+
+def in_grouping_parentheses(tokens, curr_token_index, config):
+    """Puts spaces within parantheses that aren't any of the above
+    if flag is set to True"""
+
+    res = {"before": "", "after": ""}
+
+    if config["Spaces"]["Grouping parentheses"] == "True":
+        if tokens[curr_token_index] == "R_PARENTHESES_OPEN":
+            if not check_left_brace_after_func_decl(tokens, curr_token_index):
+                for token in ["T_ARRAY","T_STRING","T_IF","T_WHILE","T_SWITCH","T_CATCH","T_FOR"]:
+                    if check_if_left_parentheses_after_token(tokens, curr_token_index, token):
+                        break
+
+                    else:
+                        res["after"] += " "
+
+        if tokens[curr_token_index] == "R_PARENTHESES_CLOSE":
+            if not check_right_brace_after_func_decl(tokens, curr_token_index):
+                for token in ["T_ARRAY","T_STRING","T_IF","T_WHILE","T_SWITCH","T_CATCH","T_FOR"]:
+                    if check_if_right_parentheses_after_token(tokens, curr_token_index, token):
+                        break
+
+                    else:
+                        res["before"] += " "
+
+    return res
+
+def in_php_tags(tokens, curr_token_index, config):
+    """Puts spaces within php with echo tags
+    if flag is set to True"""
+
+    res = {"before": "", "after": ""}
+
+    if config["Spaces"]["<?= and ?>"] == "True":
+        if tokens[curr_token_index] == "T_OPEN_TAG_WITH_ECHO":
+            res["after"] += " "
+
+        if tokens[curr_token_index] == "T_CLOSE_TAG":
+            res["before"] += " "
+
+    return res

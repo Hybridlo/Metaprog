@@ -196,7 +196,7 @@ tokens = {
     "R_PARENTHESES_OPEN": partial(match, "("),
     "R_PARENTHESES_CLOSE": partial(match, ")"),
     "S_PARENTHESES_OPEN": partial(match, "["),
-    "S_PARENTHESES": partial(match, "]"),
+    "S_PARENTHESES_CLOSE": partial(match, "]"),
     "BRACKET_OPEN": partial(match, "{"),
     "BRACKET_CLOSE": partial(match, "}"),
     "SEMICOLON": partial(match, ";"),

@@ -116,9 +116,12 @@ def check_assign_in_declare(tokens, curr_token_index):
     return False
 
 def check_class_declaration(tokens, curr_token_index):
-    """Check if current token is after class declaration;
+    """Check if current token is left brace and after class declaration;
     class declaration can have these tokens:
     T_STRING, COMMA, T_IMPLEMENTS, T_EXTENDS, T_CLASS"""
+    if tokens[curr_token_index] != "BRACKET_OPEN":
+        return False
+
     i = curr_token_index - 1
 
     while True:
@@ -134,10 +137,13 @@ def check_class_declaration(tokens, curr_token_index):
 
         return False    #invalid token found
 
-def check_function_declaration(tokens, curr_token_index):
-    """Check if current token is after function declaration;
+def check_function_declaration_left_brace(tokens, curr_token_index):
+    """Check if current token is left brace and after function declaration;
     function declaration can have these tokens:
     T_STRING, T_VARIABLE, COMMA, R_PARENTHESES_OPEN, R_PARENTHESES_CLOSE, T_FUNCTION"""
+    if tokens[curr_token_index] != "BRACKET_OPEN":
+        return False
+
     i = curr_token_index - 1
 
     while True:
@@ -154,11 +160,109 @@ def check_function_declaration(tokens, curr_token_index):
         return False    #invalid token found
 
 def check_left_brace_after_token(tokens, curr_token_index, needed_token):
-    """Check if current token is after specified;
+    """Check if current token is left brace and after specified token;
     skips parentheses in between current and specified,
     and everything in these parentheses"""
+    if tokens[curr_token_index] != "BRACKET_OPEN":
+        return False
+
     i = curr_token_index - 1
     nesting = 0
+
+    while True:
+        if i < 0:
+            return False
+
+        if tokens[i] == "R_PARENTHESES_CLOSE":
+            nesting += 1
+            i -= 1
+            continue
+        elif tokens[i] == "R_PARENTHESES_OPEN":
+            nesting -= 1
+            i -= 1
+            continue
+        elif nesting > 0:
+            i -= 1
+            continue
+
+        elif tokens[i] == needed_token:
+            return True
+
+        return False    #invalid token found with parentheses closed
+
+def check_left_brace_after_func_decl(tokens, curr_token_index):
+    """Check if current token is opening
+    parentheses and after function declaration"""
+    if curr_token_index == 0:
+        return False
+
+    if tokens[curr_token_index] != "R_PARENTHESES_OPEN":
+        return False
+
+    prev_token_1 = tokens[curr_token_index-1]
+    prev_token_2 = tokens[curr_token_index-2]
+
+    if prev_token_1 == "T_STRING" and prev_token_2 == "T_FUNCTION":
+        return True
+
+    return False
+
+def check_right_brace_after_func_decl(tokens, curr_token_index):
+    """Check if current token is closing
+    parentheses and after function declaration;
+    skips everything in these parentheses"""
+    if tokens[curr_token_index] != "R_PARENTHESES_CLOSE":
+        return False
+
+    i = curr_token_index - 1
+    nesting = 1
+
+    while True:
+        if i < 0:
+            return False
+
+        if tokens[i] == "R_PARENTHESES_CLOSE":
+            nesting += 1
+            i -= 1
+            continue
+        elif tokens[i] == "R_PARENTHESES_OPEN":
+            nesting -= 1
+            i -= 1
+            continue
+        elif nesting > 0:
+            i -= 1
+            continue
+
+        elif tokens[i] == "T_STRING" and tokens[i-1] == "T_FUNCTION":
+            return True
+
+        return False    #invalid token found with parentheses closed
+
+def check_if_left_parentheses_after_token(tokens, curr_token_index, needed_token):
+    """Check if current token is opening
+    parentheses and after specified token"""
+    if curr_token_index == 0:
+        return False
+
+    if tokens[curr_token_index] != "R_PARENTHESES_OPEN":
+        return False
+
+    prev_token = tokens[curr_token_index-1]
+
+    if prev_token == needed_token:
+        return True
+
+    return False
+
+def check_if_right_parentheses_after_token(tokens, curr_token_index, needed_token):
+    """Check if current token is closing
+    parentheses and after specified token;
+    skips everything in these parentheses"""
+    if tokens[curr_token_index] != "R_PARENTHESES_CLOSE":
+        return False
+
+    i = curr_token_index - 1
+    nesting = 1
 
     while True:
         if i < 0:
