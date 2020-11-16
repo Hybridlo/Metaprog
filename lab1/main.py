@@ -46,7 +46,7 @@ def finish_file(file_path, infile, tokens, errors):
             with open(results_folder + file_path + "\\" + filename, "w+") as outfile:
                 for i in range(len(tokens)):
                     adjustments = {"spaces_before": 0, "spaces_after": 0, "newlines_before": 0, "newlines_after": 0}
-                    tokens[i].curr_position = tuple(curr_position)      #to track newlines properly
+                    tokens[i].position = tuple(curr_position)      #to track newlines properly
 
                     for formatter in all_formatters:
                         tmp_adj = formatter(tokens, i, config)
@@ -65,7 +65,7 @@ def finish_file(file_path, infile, tokens, errors):
                         curr_position[0] += adjustments["newlines_before"]
                         curr_position[1] = 1
 
-                    tokens[i].curr_position = tuple(curr_position)      #to track newlines properly
+                    tokens[i].position = tuple(curr_position)      #to track newlines properly
 
                     if adjustments["newlines_after"] == 0:
                         res_str = res_str + " " * adjustments["spaces_after"]
@@ -73,6 +73,10 @@ def finish_file(file_path, infile, tokens, errors):
                     else:
                         curr_position[0] += adjustments["newlines_after"]
                         curr_position[1] = 1
+
+                    for letter in tokens[i].in_code:
+                        if letter == "\n":
+                            curr_position[0] += 1
 
                     outfile.write(res_str)
                     outfile.flush()
