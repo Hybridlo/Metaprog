@@ -23,7 +23,7 @@ def apply_continue_indent(tokens, curr_token_index, config):
     cont_indent = int(config["Indents"]["Continuation indent"])
 
     if (cont_indent != 0 and check_if_first_token_in_line(tokens, curr_token_index)
-        and not previous_token_is_semicolon(tokens, curr_token_index)):
+        and continues_previous_line(tokens, curr_token_index)):
 
         res["spaces_before"] += cont_indent
 
@@ -59,7 +59,7 @@ def func_decl_parentheses(tokens, curr_token_index, config):
 
     return res
 
-def func_call_paretheses(tokens, curr_token_index, config):
+def func_call_parentheses(tokens, curr_token_index, config):
     """Puts space between function call
     and paretheses if flag set to True"""
     res = {"spaces_before": 0, "spaces_after": 0}
@@ -87,6 +87,7 @@ def _token_and_parentheses(config_key, interest_token, tokens, curr_token_index,
 anon_func_paretheses = partial(_token_and_parentheses, "Anonymous function parentheses", "T_FUNCTION")
 if_parentheses = partial(_token_and_parentheses, "'if' parentheses", "T_IF")
 for_parentheses = partial(_token_and_parentheses, "'for' parentheses", "T_FOR")
+foreach_parentheses = partial(_token_and_parentheses, "'for' parentheses", "T_FOREACH")     #shared rule
 while_parentheses = partial(_token_and_parentheses, "'while' parentheses", "T_WHILE")
 switch_parentheses = partial(_token_and_parentheses, "'switch' parentheses", "T_SWITCH")
 catch_parentheses = partial(_token_and_parentheses, "'catch' parentheses", "T_CATCH")
@@ -124,7 +125,6 @@ shift_operators = partial(_around_token, "Shift operators (<<, >>)", ["T_SL", "T
 unary_operators = partial(_around_token, "Unary additive operators (+, -, ++, --)", ["UNARY_PLUS", "UNARY_MINUS", "T_DEC", "T_INC"])
 concat_operator = partial(_around_token, "Concatenation (.)", ["DOT"])
 obj_access_operator = partial(_around_token, "Object access operator (->)", ["T_OBJECT_OPERATOR"])
-null_coal_operator = partial(_around_token, "Null coalescing operator (??)", ["T_COALESCE"])
 null_coal_operator = partial(_around_token, "Null coalescing operator (??)", ["T_COALESCE"])
 
 def assignment_in_declare(tokens, curr_token_index, config):
@@ -184,6 +184,7 @@ if_left_brace = partial(_left_brace_after_token, "'if' left brace", "T_IF")
 else_left_brace = partial(_left_brace_after_token, "'else' left brace", "T_ELSE")
 elseif_left_brace = partial(_left_brace_after_token, "'else' left brace", "T_ELSEIF")     #share one rule
 for_left_brace = partial(_left_brace_after_token, "'for' left brace", "T_FOR")
+foreach_left_brace = partial(_left_brace_after_token, "'for' left brace", "T_FOREACH")    #share one rule
 while_left_brace = partial(_left_brace_after_token, "'while' left brace", "T_WHILE")
 do_left_brace = partial(_left_brace_after_token, "'do' left brace", "T_DO")
 switch_left_brace = partial(_left_brace_after_token, "'switch' left brace", "T_SWITCH")
@@ -260,6 +261,7 @@ in_array_init_parentheses = partial(_in_token_parentheses, "Within array initial
 in_func_call_parentheses = partial(_in_token_parentheses, "Within array initializer parentheses", "T_STRING")
 in_if_parentheses = partial(_in_token_parentheses, "Within 'if' parentheses", "T_IF")
 in_for_parentheses = partial(_in_token_parentheses, "Within 'for' parentheses", "T_FOR")
+in_foreach_parentheses = partial(_in_token_parentheses, "Within 'for' parentheses", "T_FOREACH")    #share one rule
 in_while_parentheses = partial(_in_token_parentheses, "Within 'while' parentheses", "T_WHILE")
 in_switch_parentheses = partial(_in_token_parentheses, "Within 'switch' parentheses", "T_SWITCH")
 in_catch_parentheses = partial(_in_token_parentheses, "Within 'catch' parentheses", "T_CATCH")
@@ -444,7 +446,7 @@ def before_return_type_colon(tokens, curr_token_index, config):
 
     return res
 
-def after_type_cast(tokens, curr_token_index, config):
+def after_return_type_colon(tokens, curr_token_index, config):
     """Puts space after return type colon
     if flag is set to True"""
 
@@ -468,8 +470,8 @@ def before_unary_not(tokens, curr_token_index, config):
 
     return res
 
-def after_type_cast(tokens, curr_token_index, config):
-    """Puts space after return type colon
+def after_unary_not(tokens, curr_token_index, config):
+    """Puts space after !
     if flag is set to True"""
 
     res = {"spaces_before": 0, "spaces_after": 0}
@@ -560,14 +562,16 @@ def _newline_before_right_parentheses_after_token(config_key, interest_token, to
 
     return res
 
-func_call_newline_right_parentheses = partial(_newline_after_left_parentheses_after_token, "Call new line after '('", "T_STRING")
-if_newline_right_parentheses = partial(_newline_after_left_parentheses_after_token, "If() new line after '('", "T_IF")
-for_newline_right_parentheses = partial(_newline_after_left_parentheses_after_token, "For() new line after '('", "T_FOR")
-array_newline_right_init_parentheses = partial(_newline_after_left_parentheses_after_token, "New line after '('", "T_ARRAY")
+func_call_newline_left_parentheses = partial(_newline_after_left_parentheses_after_token, "Call new line after '('", "T_STRING")
+if_newline_left_parentheses = partial(_newline_after_left_parentheses_after_token, "If() new line after '('", "T_IF")
+for_newline_left_parentheses = partial(_newline_after_left_parentheses_after_token, "For() new line after '('", "T_FOR")
+foreach_newline_left_parentheses = partial(_newline_after_left_parentheses_after_token, "For() new line after '('", "T_FOREACH")        #share one rule
+array_newline_left_init_parentheses = partial(_newline_after_left_parentheses_after_token, "New line after '('", "T_ARRAY")
 
 func_call_newline_right_parentheses = partial(_newline_before_right_parentheses_after_token, "Call place ')' on new line", "T_STRING")
 if_newline_right_parentheses = partial(_newline_before_right_parentheses_after_token, "If() place ')' on new line", "T_IF")
 for_newline_right_parentheses = partial(_newline_before_right_parentheses_after_token, "For() place ')' on new line", "T_FOR")
+foreach_newline_right_parentheses = partial(_newline_before_right_parentheses_after_token, "For() place ')' on new line", "T_FOREACH")  #share one rule
 array_newline_right_init_parentheses = partial(_newline_before_right_parentheses_after_token, "Place ')' on new line", "T_ARRAY")
 
 def _newline_before_paired_token(config_key, interest_token, pair_token, skip_tokens, tokens, curr_token_index, config):
@@ -634,3 +638,144 @@ def wrap_after_mods_list(tokens, curr_token_index, config):
             res["newlines_before"] += 1
 
     return res
+
+#additional general rule(s)
+def newline_after_tokens(tokens, curr_token_index, config):
+    """Puts newline at the end of some tokens if it's not in for loop"""
+
+    newline_tokens = ["SEMICOLON", "T_OPEN_TAG", "T_OPEN_TAG_WITH_ECHO", "BRACKET_OPEN", "BRACKET_CLOSE"]
+
+    res = {"newlines_before": 0, "newlines_after": 0}
+
+    if tokens[curr_token_index] in newline_tokens and not check_semicolon_in_for(tokens, curr_token_index):
+        res["newlines_after"] += 1
+
+    return res
+
+def space_after_tokens(tokens, curr_token_index, config):
+    """Puts space at the end of some tokens"""
+
+    space_tokens_after = ["T_RETURN", "T_YIELD", "T_AS", "T_NAMESPACE", "T_REQUIRE"]
+    space_tokens_before = ["T_AS"]
+
+    res = {"spaces_before": 0, "spaces_after": 0}
+
+    if tokens[curr_token_index] in space_tokens_after:
+        res["spaces_after"] += 1
+
+    if tokens[curr_token_index] in space_tokens_before:
+        res["spaces_before"] += 1
+
+    return res
+
+all_formatters = [
+    apply_indent,
+    apply_continue_indent,
+    apply_indent_in_php_tags,
+    func_decl_parentheses,
+    func_call_parentheses,
+    anon_func_paretheses,
+    if_parentheses,
+    for_parentheses,
+    foreach_parentheses,
+    while_parentheses,
+    switch_parentheses,
+    catch_parentheses,
+    array_init_parentheses,
+
+    assign_operators,
+    logical_operators,
+    equality_operators,
+    relational_operators,
+    bitwise_operators,
+    additive_operators,
+    multiplicative_operators,
+    shift_operators,
+    unary_operators,
+    concat_operator,
+    obj_access_operator,
+    null_coal_operator,
+    assignment_in_declare,
+
+    class_declaration_left_brace,
+    func_declaration_left_brace,
+    if_left_brace,
+    else_left_brace,
+    elseif_left_brace,
+    for_left_brace,
+    foreach_left_brace,
+    while_left_brace,
+    do_left_brace,
+    switch_left_brace,
+    try_left_brace,
+    catch_left_brace,
+    finally_left_brace,
+
+    before_else,
+    before_while,
+    before_catch,
+    before_finally,
+
+    in_brackets,
+    in_func_decl_parentheses,
+    in_array_init_parentheses,
+    in_func_call_parentheses,
+    in_if_parentheses,
+    in_for_parentheses,
+    in_foreach_parentheses,
+    in_while_parentheses,
+    in_switch_parentheses,
+    in_catch_parentheses,
+    in_grouping_parentheses,
+    in_php_tags,
+
+    before_question,
+    after_question,
+    before_colon_ternary,
+    after_colon_ternary,
+    between_question_and_colon,
+
+    before_comma,
+    after_comma,
+    before_for_semicolon,
+    after_for_semicolon,
+    after_type_cast,
+    before_return_type_colon,
+    after_return_type_colon,
+    before_unary_not,
+    after_unary_not,
+    
+    one_line_control_statement,
+
+    func_decl_newline_after_left_parentheses,
+    func_decl_newline_before_right_parentheses,
+    func_decl_newline_after_right_parentheses,
+
+    func_call_newline_left_parentheses,
+    func_call_newline_right_parentheses,
+
+    if_newline_left_parentheses,
+    if_newline_right_parentheses,
+    else_newline,
+
+    for_newline_left_parentheses,
+    foreach_newline_left_parentheses,
+    for_newline_right_parentheses,
+    foreach_newline_right_parentheses,
+
+    while_newline,
+
+    indent_case_branches,
+    indent_break_case_branches,
+
+    catch_newline,
+    finally_newline,
+
+    array_newline_left_init_parentheses,
+    array_newline_right_init_parentheses,
+
+    wrap_after_mods_list,
+
+    newline_after_tokens,
+    space_after_tokens,
+]

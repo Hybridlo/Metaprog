@@ -1,4 +1,7 @@
 from token.tokenizer import tokenize
+from formatting.formatters import all_formatters
+from formatting.options import Options
+
 import argparse
 import os
 
@@ -31,9 +34,47 @@ def finish_file(project_dir, file_path, infile, tokens, errors):
                 outfile.write(infile.name + ": " + error + "\n")
 
     #TODO: create formatted file(s)
+    if len(errors) == 0:
+        config = Options("default")
+        curr_position = [1, 1]
+
+        for i in range(len(tokens)):
+            adjustments = {"spaces_before": 0, "spaces_after": 0, "newlines_before": 0, "newlines_after": 0}
+            tokens[i].curr_position = tuple(curr_position)      #to track newlines properly
+
+            for formatter in all_formatters:
+                tmp_adj = formatter(tokens, i, config)
+
+                for key in tmp_adj:
+                    adjustments[key] += tmp_adj[key]
+
+            res_str = tokens[i].in_code
+            res_str = "\n" * adjustments["newlines_before"] + res_str
+            res_str = res_str + "\n" * adjustments["newlines_after"]
+
+            if adjustments["newlines_before"] == 0:
+                res_str = " " * adjustments["spaces_before"] + res_str
+                curr_position[1] += adjustments["spaces_before"]
+            else:
+                curr_position[0] += adjustments["newlines_before"]
+                curr_position[1] = 1
+
+            tokens[i].curr_position = tuple(curr_position)      #to track newlines properly
+
+            if adjustments["newlines_after"] == 0:
+                res_str = res_str + " " * adjustments["spaces_after"]
+                curr_position[1] += adjustments["spaces_after"]
+            else:
+                curr_position[0] += adjustments["newlines_after"]
+                curr_position[1] = 1
+
+            print(res_str, end="")
 
 def scan_file(filename, project_dir="", file_path=""):
-    with open(file_path + "\\" + filename, "r") as infile:
+    if file_path != "":
+        file_path += "\\"
+
+    with open(file_path + filename, "r") as infile:
         data = infile.read()
 
         tokens, errors = tokenize(data)

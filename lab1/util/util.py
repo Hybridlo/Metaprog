@@ -5,16 +5,18 @@ def count_token_nesting(tokens, curr_token_index, nesting_token_open, nesting_to
     and php tags"""
 
     nesting_level = 0
+    
+    for i in range(len(tokens)):
+        
 
-    for token in tokens:
-        if tokens.index(token) == curr_token_index:
-            break
-
-        if token in nesting_token_open:
+        if tokens[i] in nesting_token_open:
             nesting_level += 1
 
-        if token in nesting_token_close:
+        if tokens[i] in nesting_token_close:
             nesting_level -= 1
+
+        if i == curr_token_index:
+            break
 
     return nesting_level
 
@@ -31,14 +33,18 @@ def check_if_first_token_in_line(tokens, curr_token_index):
 
     return False
 
-def previous_token_is_semicolon(tokens, curr_token_index):
-    """Check if last token was a semicolon"""
+def continues_previous_line(tokens, curr_token_index):
+    """Check this token continues a line"""
     if curr_token_index == 0:
         return False
 
     prev_token = tokens[curr_token_index-1]
 
-    if prev_token == "SEMICOLON":
+    tokens_dont_continue = ["SEMICOLON", "T_TAG", "T_OPEN_TAG", "T_OPEN_TAG_WITH_ECHO", "R_PARENTHESES_OPEN", "S_PARENTHESES_OPEN",
+                            "BRACKET_OPEN", "BRACKET_CLOSE", "T_COMMENT", "T_DOC_COMMENT",
+                           ]
+
+    if prev_token not in tokens_dont_continue:
         return True
     
     return False
@@ -84,7 +90,7 @@ def check_if_func_call(tokens, curr_token_index):
 def check_if_token_before_paretheses(tokens, curr_token_index, needed_token):
     """Check if current token is needed_token
     and is followed by paretheses"""
-    if len(tokens) == curr_token_index - 1:
+    if len(tokens) - 2 < curr_token_index:
         return False
 
     curr_token = tokens[curr_token_index]

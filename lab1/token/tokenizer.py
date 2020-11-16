@@ -152,8 +152,6 @@ def tokenize(file_str):
 
                         break
 
-                    print("lal")
-                    print(str_to_take)
                     errors.append(f"Unidentified token at ({position[0]}, {position[1]})")
                     file_str = file_str[len(str_to_take)-1:]        #discard unidentified token
                     break
