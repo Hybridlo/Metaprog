@@ -569,3 +569,22 @@ func_call_newline_right_parentheses = partial(_newline_before_right_parentheses_
 if_newline_right_parentheses = partial(_newline_before_right_parentheses_after_token, "If() place ')' on new line", "T_IF")
 for_newline_right_parentheses = partial(_newline_before_right_parentheses_after_token, "For() place ')' on new line", "T_FOR")
 array_newline_right_init_parentheses = partial(_newline_before_right_parentheses_after_token, "Place ')' on new line", "T_ARRAY")
+
+def _newline_before_paired_token(config_key, interest_token, pair_token, skip_tokens, tokens, curr_token_index, config):
+    """Puts newline before specified token
+    if it's paired (after '}' and another token)
+    if flag is set to True"""
+
+    res = {"newlines_before": 0, "newlines_after": 0}
+
+    if config["Wrapping and Braces"][config_key] == "True":
+        if check_if_token_paired(tokens, curr_token_index, interest_token, pair_token, skip_tokens):
+            res["newlines_before"] += 1
+
+    return res
+
+else_newline = partial(_newline_before_paired_token, "'else' on new line", "T_ELSE", "T_IF", ["T_ELSEIF"])
+elseif_newline = partial(_newline_before_paired_token, "'else' on new line", "T_ELSEIF", "T_IF", ["T_ELSEIF"])    #shared rule
+while_newline = partial(_newline_before_paired_token, "'while' on new line", "T_WHILE", "T_DO", [])
+catch_newline = partial(_newline_before_paired_token, "'catch' on new line", "T_CATCH", "T_TRY", [])
+finally_newline = partial(_newline_before_paired_token, "'finally' on new line", "T_FINALLY", "T_TRY", ["T_CATCH"])

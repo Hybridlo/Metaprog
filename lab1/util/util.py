@@ -350,3 +350,31 @@ def check_type_cast(tokens, curr_token_index):
         return True
 
     return False
+
+def check_if_token_paired(tokens, curr_token_index, interest_token, pair_token, skip_tokens):
+    if tokens[curr_token_index] != interest_token:
+        return False
+
+    i = curr_token_index - 1
+    nesting = 0
+
+    while True:
+        if i < 0:
+            return False
+
+        if tokens[i] == "BRACKET_CLOSE":
+            nesting += 1
+            i -= 1
+            continue
+        elif tokens[i] == "BRACKET_OPEN":
+            nesting -= 1
+            i -= 1
+            continue
+        elif nesting > 0 or tokens[i] in skip_tokens:
+            i -= 1
+            continue
+
+        elif tokens[i] == pair_token:
+            return True
+
+        return False    #invalid token found with parentheses closed
