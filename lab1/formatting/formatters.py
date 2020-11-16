@@ -479,3 +479,93 @@ def after_type_cast(tokens, curr_token_index, config):
             res["spaces_after"] += 1
 
     return res
+
+#Wrapping
+def one_line_control_statement(tokens, curr_token_index, config):
+    """Puts control statement in one line
+    if flag is set to True"""
+
+    res = {"newlines_before": 0, "newlines_after": 0}
+
+    if config["Wrapping and Braces"]["Control statement in one line"] == "False":
+        if check_if_right_parentheses_after_token(tokens, curr_token_index, "T_IF"):
+            res["newlines_after"] += 1
+
+    return res
+
+#Function declaration wrapping
+def func_decl_newline_after_left_parentheses(tokens, curr_token_index, config):
+    """Puts newline in function
+    declaration after left parentheses
+    if flag is set to True"""
+
+    res = {"newlines_before": 0, "newlines_after": 0}
+
+    if config["Wrapping and Braces"]["Declatarion new line after '('"] == "True":
+        if check_left_parentheses_after_func_decl(tokens, curr_token_index):
+            res["newlines_after"] += 1
+
+    return res
+
+def func_decl_newline_before_right_parentheses(tokens, curr_token_index, config):
+    """Puts newline in function
+    declaration before right parentheses
+    if flag is set to True"""
+
+    res = {"newlines_before": 0, "newlines_after": 0}
+
+    if config["Wrapping and Braces"]["Declatarion place ')' on new line"] == "True":
+        if check_right_parentheses_after_func_decl(tokens, curr_token_index):
+            res["newlines_before"] += 1
+
+    return res
+
+def func_decl_newline_after_right_parentheses(tokens, curr_token_index, config):
+    """Puts newline in function
+    declaration after right parentheses
+    if flag is set to True"""
+
+    res = {"newlines_before": 0, "newlines_after": 0}
+
+    if config["Wrapping and Braces"]["Keep ')' and '{' on one line"] == "False":
+        if check_right_parentheses_after_func_decl(tokens, curr_token_index):
+            res["newlines_after"] += 1
+
+    return res
+
+#Function and keywords call wrapping
+def _newline_after_left_parentheses_after_token(config_key, interest_token, tokens, curr_token_index, config):
+    """Puts newline after left parentheses
+    if it's after specified token
+    if flag is set to True"""
+
+    res = {"newlines_before": 0, "newlines_after": 0}
+
+    if config["Wrapping and Braces"][config_key] == "True":
+        if check_if_left_parentheses_after_token(tokens, curr_token_index, interest_token):
+            res["newlines_after"] += 1
+
+    return res
+
+def _newline_before_right_parentheses_after_token(config_key, interest_token, tokens, curr_token_index, config):
+    """Puts newline before right parentheses
+    if it's after specified token
+    if flag is set to True"""
+
+    res = {"newlines_before": 0, "newlines_after": 0}
+
+    if config["Wrapping and Braces"][config_key] == "True":
+        if check_if_right_parentheses_after_token(tokens, curr_token_index, interest_token):
+            res["newlines_before"] += 1
+
+    return res
+
+func_call_newline_right_parentheses = partial(_newline_after_left_parentheses_after_token, "Call new line after '('", "T_STRING")
+if_newline_right_parentheses = partial(_newline_after_left_parentheses_after_token, "If() new line after '('", "T_IF")
+for_newline_right_parentheses = partial(_newline_after_left_parentheses_after_token, "For() new line after '('", "T_FOR")
+array_newline_right_init_parentheses = partial(_newline_after_left_parentheses_after_token, "New line after '('", "T_ARRAY")
+
+func_call_newline_right_parentheses = partial(_newline_before_right_parentheses_after_token, "Call place ')' on new line", "T_STRING")
+if_newline_right_parentheses = partial(_newline_before_right_parentheses_after_token, "If() place ')' on new line", "T_IF")
+for_newline_right_parentheses = partial(_newline_before_right_parentheses_after_token, "For() place ')' on new line", "T_FOR")
+array_newline_right_init_parentheses = partial(_newline_before_right_parentheses_after_token, "Place ')' on new line", "T_ARRAY")
