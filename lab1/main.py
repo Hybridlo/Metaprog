@@ -24,53 +24,60 @@ arg_parser.add_argument("-fr", "--format", action="store", dest="template", help
 
 args = arg_parser.parse_args()
 
+if args.template:
+    config = Options(args.template)
+
 #apply -v and -f to tokenized file
-def finish_file(project_dir, file_path, infile, tokens, errors):
+def finish_file(file_path, infile, tokens, errors):
     #print errors to errors.log
     if args.verify:
-        os.makedirs(results_folder + project_dir, exist_ok=True)
-        with open(results_folder + project_dir + "\\errors.log", "a+") as outfile:
+        os.makedirs(results_folder + file_path, exist_ok=True)
+        with open(results_folder + file_path + "\\errors.log", "a+") as outfile:
             for error in errors:
                 outfile.write(infile.name + ": " + error + "\n")
 
-    #TODO: create formatted file(s)
+    filename = os.path.basename(infile.name)
+    
     if len(errors) == 0:
-        config = Options("default")
         curr_position = [1, 1]
 
-        for i in range(len(tokens)):
-            adjustments = {"spaces_before": 0, "spaces_after": 0, "newlines_before": 0, "newlines_after": 0}
-            tokens[i].curr_position = tuple(curr_position)      #to track newlines properly
+        if args.template:
+            os.makedirs(results_folder + file_path, exist_ok=True)
+            with open(results_folder + file_path + "\\" + filename, "w+") as outfile:
+                for i in range(len(tokens)):
+                    adjustments = {"spaces_before": 0, "spaces_after": 0, "newlines_before": 0, "newlines_after": 0}
+                    tokens[i].curr_position = tuple(curr_position)      #to track newlines properly
 
-            for formatter in all_formatters:
-                tmp_adj = formatter(tokens, i, config)
+                    for formatter in all_formatters:
+                        tmp_adj = formatter(tokens, i, config)
 
-                for key in tmp_adj:
-                    adjustments[key] += tmp_adj[key]
+                        for key in tmp_adj:
+                            adjustments[key] += tmp_adj[key]
 
-            res_str = tokens[i].in_code
-            res_str = "\n" * adjustments["newlines_before"] + res_str
-            res_str = res_str + "\n" * adjustments["newlines_after"]
+                    res_str = tokens[i].in_code
+                    res_str = "\n" * adjustments["newlines_before"] + res_str
+                    res_str = res_str + "\n" * adjustments["newlines_after"]
 
-            if adjustments["newlines_before"] == 0:
-                res_str = " " * adjustments["spaces_before"] + res_str
-                curr_position[1] += adjustments["spaces_before"]
-            else:
-                curr_position[0] += adjustments["newlines_before"]
-                curr_position[1] = 1
+                    if adjustments["newlines_before"] == 0:
+                        res_str = " " * adjustments["spaces_before"] + res_str
+                        curr_position[1] += adjustments["spaces_before"]
+                    else:
+                        curr_position[0] += adjustments["newlines_before"]
+                        curr_position[1] = 1
 
-            tokens[i].curr_position = tuple(curr_position)      #to track newlines properly
+                    tokens[i].curr_position = tuple(curr_position)      #to track newlines properly
 
-            if adjustments["newlines_after"] == 0:
-                res_str = res_str + " " * adjustments["spaces_after"]
-                curr_position[1] += adjustments["spaces_after"]
-            else:
-                curr_position[0] += adjustments["newlines_after"]
-                curr_position[1] = 1
+                    if adjustments["newlines_after"] == 0:
+                        res_str = res_str + " " * adjustments["spaces_after"]
+                        curr_position[1] += adjustments["spaces_after"]
+                    else:
+                        curr_position[0] += adjustments["newlines_after"]
+                        curr_position[1] = 1
 
-            print(res_str, end="")
+                    outfile.write(res_str)
+                    outfile.flush()
 
-def scan_file(filename, project_dir="", file_path=""):
+def scan_file(filename, file_path=""):
     if file_path != "":
         file_path += "\\"
 
@@ -79,10 +86,10 @@ def scan_file(filename, project_dir="", file_path=""):
 
         tokens, errors = tokenize(data)
 
-        if project_dir == "":
-            finish_file(infile.name, "", infile, tokens, errors)
+        if file_path == "":
+            finish_file(infile.name, infile, tokens, errors)
         else:
-            finish_file(project_dir, file_path, infile, tokens, errors)
+            finish_file(file_path, infile, tokens, errors)
 
 if args.file:
     scan_file(args.file)
@@ -90,9 +97,9 @@ if args.file:
 if args.directory:
     for item in os.listdir(args.directory):
         if item[-(1 + len(extention)):] == "." + extention:   #only check files with specified extention
-            scan_file(item, args.directory, args.directory)
+            scan_file(item, args.directory)
 
 if args.project:
     for path, dirs, files in os.walk(args.project):
         for filename in files:
-            scan_file(filename, args.project, path)
+            scan_file(filename, path)

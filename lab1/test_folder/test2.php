@@ -10,7 +10,7 @@ $dir = __DIR__ . '/code/parser';
 
 $testParser = new CodeTestParser;
 $codeParsingTest = new CodeParsingTest;
-foreach (filesInDir($dir, 'test') as $fileName => $code) 
+foreach (filesInDir($dir, 'test') as $fileName => $code) {
     if (false !== strpos($code, '@@{')) {
         // Skip tests with evaluate segments
         continue;

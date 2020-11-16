@@ -26,6 +26,6 @@ function filesInDir($directory, $fileExtension) {
     $it = new \RegexIterator($it, '(\.' . preg_quote($fileExtension) . '$)');
     foreach ($it as $file) {
         $fileName = $file->getPathname();
-        yield $fileName => file_get_contents($fileName;
+        yield $fileName => file_get_contents($fileName);
     }
 }

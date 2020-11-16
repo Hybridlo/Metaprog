@@ -308,6 +308,8 @@ def check_if_colon_in_ternary(tokens, curr_token_index):
         if tokens[i] == "Q_MARK":
             return True
 
+        i -= 1
+
 def check_semicolon_in_for(tokens, curr_token_index):
     """Check if current token is semicolon in for"""
     if tokens[curr_token_index] != "SEMICOLON":

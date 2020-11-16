@@ -655,7 +655,7 @@ def newline_after_tokens(tokens, curr_token_index, config):
 def space_after_tokens(tokens, curr_token_index, config):
     """Puts space at the end of some tokens"""
 
-    space_tokens_after = ["T_RETURN", "T_YIELD", "T_AS", "T_NAMESPACE", "T_REQUIRE"]
+    space_tokens_after = ["T_RETURN", "T_YIELD", "T_AS", "T_NAMESPACE", "T_REQUIRE", "T_NEW"]
     space_tokens_before = ["T_AS"]
 
     res = {"spaces_before": 0, "spaces_after": 0}
