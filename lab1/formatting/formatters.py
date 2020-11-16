@@ -588,3 +588,49 @@ elseif_newline = partial(_newline_before_paired_token, "'else' on new line", "T_
 while_newline = partial(_newline_before_paired_token, "'while' on new line", "T_WHILE", "T_DO", [])
 catch_newline = partial(_newline_before_paired_token, "'catch' on new line", "T_CATCH", "T_TRY", [])
 finally_newline = partial(_newline_before_paired_token, "'finally' on new line", "T_FINALLY", "T_TRY", ["T_CATCH"])
+
+#Switch indentation
+def indent_case_branches(tokens, curr_token_index, config):
+    """Removes one indentation level from case branches
+    if flag for indenting case branches id set to False"""
+
+    res = {"spaces_before": 0, "spaces_after": 0}
+
+    indent = int(config["Indents"]["Indent"])
+
+    if config["Wrapping and Braces"]["Indent 'case' branches"] == "False":
+        if (indent != 0 and check_if_first_token_in_line(tokens, curr_token_index)
+            and check_if_in_case_branch(tokens, curr_token_index) and tokens[curr_token_index] != "T_BREAK"):
+            
+            res["spaces_before"] -= indent
+    
+    return res
+
+def indent_break_case_branches(tokens, curr_token_index, config):
+    """Removes one indentation level from break in case branches
+    if flag for indenting case branches id set to False (separate rule)"""
+
+    res = {"spaces_before": 0, "spaces_after": 0}
+
+    indent = int(config["Indents"]["Indent"])
+
+    if config["Wrapping and Braces"]["Indent 'break' from 'case'"] == "False":
+        if (indent != 0 and check_if_first_token_in_line(tokens, curr_token_index)
+            and check_if_in_case_branch(tokens, curr_token_index) and tokens[curr_token_index] == "T_BREAK"):
+            
+            res["spaces_before"] -= indent
+    
+    return res
+
+#Modifier wrap
+def wrap_after_mods_list(tokens, curr_token_index, config):
+    """Puts newline after modifier list
+    if flag is set to True"""
+
+    res = {"newlines_before": 0, "newlines_after": 0}
+
+    if config["Wrapping and Braces"]["Wrap after modifier list"] == "True":
+        if check_func_or_class_with_mods(tokens, curr_token_index):
+            res["newlines_before"] += 1
+
+    return res

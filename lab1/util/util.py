@@ -352,6 +352,9 @@ def check_type_cast(tokens, curr_token_index):
     return False
 
 def check_if_token_paired(tokens, curr_token_index, interest_token, pair_token, skip_tokens):
+    """Checks if current token is the one needed and
+    if it's paired with pair token, skipping blocks in {}
+    and skip tokens (like catch in try-catch-finally)"""
     if tokens[curr_token_index] != interest_token:
         return False
 
@@ -378,3 +381,37 @@ def check_if_token_paired(tokens, curr_token_index, interest_token, pair_token, 
             return True
 
         return False    #invalid token found with parentheses closed
+
+def check_if_in_case_branch(tokens, curr_token_index):
+    """Checks if token is in case branch, skipping {} blocks"""
+    i = curr_token_index - 1
+    nesting = 0
+
+    while True:
+        if i < 0:
+            return False
+
+        if tokens[i] == "BRACKET_CLOSE":
+            nesting += 1
+            i -= 1
+            continue
+        elif tokens[i] == "BRACKET_OPEN":
+            nesting -= 1
+            i -= 1
+            continue
+        elif nesting > 0:
+            i -= 1
+            continue
+        elif tokens[i] == "T_CASE":
+            return True
+
+def check_func_or_class_with_mods(tokens, curr_token_index):
+    if curr_token_index == 0:
+        return False
+
+    modifier_list = ["T_PRIVATE", "T_PROTECTED", "T_PUBLIC", "T_ABSTRACT", "T_FINAL"]
+
+    if tokens[curr_token_index] in ["T_FUNCTION", "T_CLASS"] and tokens[curr_token_index-1] in modifier_list:
+        return True
+
+    return False
