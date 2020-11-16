@@ -18,6 +18,13 @@ class Token:
         self.in_code = in_code
         self.position = position
 
+    def __eq__(self, other):
+        if isinstance(other, Token):
+            return self.token == other.token
+        if isinstance(other, str):
+            return self.token == other
+        return False
+
 def check_whitespace(to_check):
     """function to check for whitespace"""
     if to_check in [" ", "\t", "\r"]:

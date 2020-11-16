@@ -160,7 +160,7 @@ def func_declaration_left_brace(tokens, curr_token_index, config):
     res = {"before": "", "after": ""}
 
     if (config["Spaces"]["Function left brace"] == "True" 
-        and check_function_declaration_left_brace(tokens, curr_token_index)):
+        and check_after_function_declaration(tokens, curr_token_index, "BRACKET_OPEN")):
         res["before"] += " "
 
     return res
@@ -232,10 +232,10 @@ def in_func_decl_parentheses(tokens, curr_token_index, config):
     res = {"before": "", "after": ""}
 
     if config["Spaces"]["Within function declaration parentheses"] == "True":
-        if check_left_brace_after_func_decl(tokens, curr_token_index):
+        if check_left_parentheses_after_func_decl(tokens, curr_token_index):
             res["after"] += " "
 
-        if check_right_brace_after_func_decl(tokens, curr_token_index):
+        if check_right_parentheses_after_func_decl(tokens, curr_token_index):
             res["before"] += " "
 
     return res
@@ -272,7 +272,7 @@ def in_grouping_parentheses(tokens, curr_token_index, config):
 
     if config["Spaces"]["Grouping parentheses"] == "True":
         if tokens[curr_token_index] == "R_PARENTHESES_OPEN":
-            if not check_left_brace_after_func_decl(tokens, curr_token_index):
+            if not check_left_parentheses_after_func_decl(tokens, curr_token_index):
                 for token in ["T_ARRAY","T_STRING","T_IF","T_WHILE","T_SWITCH","T_CATCH","T_FOR"]:
                     if check_if_left_parentheses_after_token(tokens, curr_token_index, token):
                         break
@@ -281,7 +281,7 @@ def in_grouping_parentheses(tokens, curr_token_index, config):
                         res["after"] += " "
 
         if tokens[curr_token_index] == "R_PARENTHESES_CLOSE":
-            if not check_right_brace_after_func_decl(tokens, curr_token_index):
+            if not check_right_parentheses_after_func_decl(tokens, curr_token_index):
                 for token in ["T_ARRAY","T_STRING","T_IF","T_WHILE","T_SWITCH","T_CATCH","T_FOR"]:
                     if check_if_right_parentheses_after_token(tokens, curr_token_index, token):
                         break
@@ -368,5 +368,114 @@ def between_question_and_colon(tokens, curr_token_index, config):
         if tokens[curr_token_index] == "Q_MARK":
             if tokens[curr_token_index+1] == "COLON":
                 res["after"] += " "
+
+    return res
+
+#Others
+def before_comma(tokens, curr_token_index, config):
+    """Puts space before ,
+    if flag is set to True"""
+
+    res = {"before": "", "after": ""}
+
+    if config["Spaces"]["Before comma"] == "True":
+        if tokens[curr_token_index] == "COMMA":
+            res["before"] += " "
+
+    return res
+
+def after_comma(tokens, curr_token_index, config):
+    """Puts space before ,
+    if flag is set to True"""
+
+    res = {"before": "", "after": ""}
+
+    if config["Spaces"]["After comma"] == "True":
+        if tokens[curr_token_index] == "COMMA":
+            res["after"] += " "
+
+    return res
+
+def before_for_semicolon(tokens, curr_token_index, config):
+    """Puts space before ; in for
+    if flag is set to True"""
+
+    res = {"before": "", "after": ""}
+
+    if config["Spaces"]["Before 'for' semicolon"] == "True":
+        if check_semicolon_in_for(tokens, curr_token_index):
+            res["before"] += " "
+
+    return res
+
+def after_for_semicolon(tokens, curr_token_index, config):
+    """Puts space after ; in for
+    if flag is set to True"""
+
+    res = {"before": "", "after": ""}
+
+    if config["Spaces"]["After 'for' semicolon"] == "True":
+        if check_semicolon_in_for(tokens, curr_token_index):
+            res["after"] += " "
+
+    return res
+
+def after_type_cast(tokens, curr_token_index, config):
+    """Puts space after type cast
+    if flag is set to True"""
+
+    res = {"before": "", "after": ""}
+
+    if config["Spaces"]["After type cast"] == "True":
+        if check_type_cast(tokens, curr_token_index):
+            res["after"] += " "
+
+    return res
+
+def before_return_type_colon(tokens, curr_token_index, config):
+    """Puts space before return type colon
+    if flag is set to True"""
+
+    res = {"before": "", "after": ""}
+
+    if config["Spaces"]["Before colon in return type"] == "True":
+        if check_after_function_declaration(tokens, curr_token_index, "COLON"):
+            res["before"] += " "
+
+    return res
+
+def after_type_cast(tokens, curr_token_index, config):
+    """Puts space after return type colon
+    if flag is set to True"""
+
+    res = {"before": "", "after": ""}
+
+    if config["Spaces"]["After colon in return type"] == "True":
+        if check_after_function_declaration(tokens, curr_token_index, "COLON"):
+            res["after"] += " "
+
+    return res
+
+def before_unary_not(tokens, curr_token_index, config):
+    """Puts space before !
+    if flag is set to True"""
+
+    res = {"before": "", "after": ""}
+
+    if config["Spaces"]["Before unary Not (!)"] == "True":
+        if tokens[curr_token_index] == "EX_MARK":
+            res["before"] += " "
+
+    return res
+
+def after_type_cast(tokens, curr_token_index, config):
+    """Puts space after return type colon
+    if flag is set to True"""
+
+    res = {"before": "", "after": ""}
+
+    if config["Spaces"]["After unary Not (!)"] == "True":
+        if tokens[curr_token_index] == "EX_MARK":
+            res["after"] += " "
 
     return res

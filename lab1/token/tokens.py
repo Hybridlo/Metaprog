@@ -215,6 +215,7 @@ tokens = {
     "MULTIPLY": partial(match, "*"),
     "DIVIDE": partial(match, "/"),
     "MODULO": partial(match, "%"),
+    "RX_MARK": partial(match, "!"),
 }
 
 def detect_token(to_check):

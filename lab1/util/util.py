@@ -10,10 +10,10 @@ def count_token_nesting(tokens, curr_token_index, nesting_token_open, nesting_to
         if tokens.index(token) == curr_token_index:
             break
 
-        if token.token in nesting_token_open:
+        if token in nesting_token_open:
             nesting_level += 1
 
-        if token.token in nesting_token_close:
+        if token in nesting_token_close:
             nesting_level -= 1
 
     return nesting_level
@@ -38,7 +38,7 @@ def previous_token_is_semicolon(tokens, curr_token_index):
 
     prev_token = tokens[curr_token_index-1]
 
-    if prev_token.token == "SEMICOLON":
+    if prev_token == "SEMICOLON":
         return True
     
     return False
@@ -137,11 +137,11 @@ def check_class_declaration(tokens, curr_token_index):
 
         return False    #invalid token found
 
-def check_function_declaration_left_brace(tokens, curr_token_index):
-    """Check if current token is left brace and after function declaration;
+def check_after_function_declaration(tokens, curr_token_index, needed_token):
+    """Check current token and is after function declaration;
     function declaration can have these tokens:
-    T_STRING, T_VARIABLE, COMMA, R_PARENTHESES_OPEN, R_PARENTHESES_CLOSE, T_FUNCTION"""
-    if tokens[curr_token_index] != "BRACKET_OPEN":
+    COLON, T_STRING, T_VARIABLE, COMMA, R_PARENTHESES_OPEN, R_PARENTHESES_CLOSE, T_FUNCTION"""
+    if tokens[curr_token_index] != needed_token:
         return False
 
     i = curr_token_index - 1
@@ -150,7 +150,7 @@ def check_function_declaration_left_brace(tokens, curr_token_index):
         if i < 0:
             return False
 
-        if tokens[i] in ["T_STRING", "T_VARIABLE", "COMMA", "R_PARENTHESES_OPEN", "R_PARENTHESES_CLOSE"]:
+        if tokens[i] in ["COLON", "T_STRING", "T_VARIABLE", "COMMA", "R_PARENTHESES_OPEN", "R_PARENTHESES_CLOSE"]:
             i -= 1
             continue
 
@@ -190,7 +190,7 @@ def check_left_brace_after_token(tokens, curr_token_index, needed_token):
 
         return False    #invalid token found with parentheses closed
 
-def check_left_brace_after_func_decl(tokens, curr_token_index):
+def check_left_parentheses_after_func_decl(tokens, curr_token_index):
     """Check if current token is opening
     parentheses and after function declaration"""
     if curr_token_index == 0:
@@ -207,7 +207,7 @@ def check_left_brace_after_func_decl(tokens, curr_token_index):
 
     return False
 
-def check_right_brace_after_func_decl(tokens, curr_token_index):
+def check_right_parentheses_after_func_decl(tokens, curr_token_index):
     """Check if current token is closing
     parentheses and after function declaration;
     skips everything in these parentheses"""
@@ -301,3 +301,52 @@ def check_if_colon_in_ternary(tokens, curr_token_index):
 
         if tokens[i] == "Q_MARK":
             return True
+
+def check_semicolon_in_for(tokens, curr_token_index):
+    """Check if current token is semicolon in for"""
+    if tokens[curr_token_index] != "SEMICOLON":
+        return False
+
+    i = curr_token_index - 1
+    nesting = 1
+
+    while True:
+        if i < 0:
+            return False
+
+        if tokens[i] == "R_PARENTHESES_CLOSE":
+            nesting += 1
+            i -= 1
+            continue
+        elif tokens[i] == "R_PARENTHESES_OPEN":
+            nesting -= 1
+            i -= 1
+            continue
+        elif nesting > 0:
+            i -= 1
+            continue
+
+        elif tokens[i] == "T_FOR":
+            return True
+
+        return False    #invalid token found with parentheses closed
+
+def check_type_cast(tokens, curr_token_index):
+    """Check if token is type cast"""
+
+    if tokens[curr_token_index] in ["T_ARRAY_CAST", "T_BOOL_CAST", "T_DOUBLE_CAST", "T_INT_CAST", "T_OBJECT_CAST", "T_STRING_CAST", "T_UNSET_CAST"]:
+        return True
+
+    if curr_token_index == 0 or len(tokens) == curr_token_index - 1:
+        return False
+
+    curr_token = tokens[curr_token_index]
+    prev_token = tokens[curr_token_index-1]
+    next_token = tokens[curr_token_index+1]
+
+    if (curr_token == "T_STRING" and prev_token == "R_PARENTHESES_OPEN"
+        and next_token == "R_PARENTHESES_CLOSE"):
+
+        return True
+
+    return False
