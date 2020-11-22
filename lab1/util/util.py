@@ -423,3 +423,15 @@ def check_func_or_class_with_mods(tokens, curr_token_index):
         return True
 
     return False
+
+def check_string_after_var(tokens, curr_token_index):
+    if len(tokens) == curr_token_index - 1:
+        return False
+
+    curr_token = tokens[curr_token_index]
+    next_token = tokens[curr_token_index+1]
+
+    if curr_token == "T_STRING" and next_token == "T_VARIABLE":
+        return True
+
+    return False

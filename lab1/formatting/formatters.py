@@ -643,10 +643,12 @@ def wrap_after_mods_list(tokens, curr_token_index, config):
 def newline_after_tokens(tokens, curr_token_index, config):
     """Puts newline at the end of some tokens if it's not in for loop"""
 
-    newline_tokens = ["SEMICOLON", "T_OPEN_TAG", "T_OPEN_TAG_WITH_ECHO", "BRACKET_OPEN", "BRACKET_CLOSE"]
+    newline_tokens = ["SEMICOLON", "T_OPEN_TAG", "T_OPEN_TAG_WITH_ECHO", "BRACKET_OPEN", "BRACKET_CLOSE", "T_DOC_COMMENT"]
 
     res = {"newlines_before": 0, "newlines_after": 0}
 
+    if tokens[curr_token_index] == "T_DOC_STRING":
+        print(tokens[curr_token_index] in newline_tokens, not check_semicolon_in_for(tokens, curr_token_index))
     if tokens[curr_token_index] in newline_tokens and not check_semicolon_in_for(tokens, curr_token_index):
         res["newlines_after"] += 1
 
@@ -655,7 +657,9 @@ def newline_after_tokens(tokens, curr_token_index, config):
 def space_after_tokens(tokens, curr_token_index, config):
     """Puts space at the end of some tokens"""
 
-    space_tokens_after = ["T_RETURN", "T_YIELD", "T_AS", "T_NAMESPACE", "T_REQUIRE", "T_NEW"]
+    space_tokens_after = ["T_RETURN", "T_YIELD", "T_AS", "T_NAMESPACE", "T_REQUIRE",
+                          "T_NEW", "T_CLASS", "T_PRIVATE", "T_PROTECTED", "T_PUBLIC",
+                          "T_ABSTRACT"]
     space_tokens_before = ["T_AS"]
 
     res = {"spaces_before": 0, "spaces_after": 0}
@@ -665,6 +669,16 @@ def space_after_tokens(tokens, curr_token_index, config):
 
     if tokens[curr_token_index] in space_tokens_before:
         res["spaces_before"] += 1
+
+    return res
+
+def space_between_strings_and_var(tokens, curr_token_index, config):
+    """Space after some common string identifiers"""
+
+    res = {"spaces_before": 0, "spaces_after": 0}
+
+    if check_string_after_var(tokens, curr_token_index):
+        res["spaces_after"] += 1
 
     return res
 
@@ -778,4 +792,5 @@ all_formatters = [
 
     newline_after_tokens,
     space_after_tokens,
+    space_between_strings_and_var,
 ]

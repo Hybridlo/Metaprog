@@ -28,15 +28,20 @@ if args.template:
     config = Options(args.template)
 
 #apply -v and -f to tokenized file
-def finish_file(file_path, infile, tokens, errors):
+def finish_file(proj_path, proj_name, infile, tokens, errors):
+    file_in_proj_path = os.path.relpath(proj_path, os.path.dirname(infile.name))
+    file_path = proj_name + file_in_proj_path
+    filename = os.path.basename(infile.name)
+
+    if proj_name == "":
+        proj_name = filename
+
     #print errors to errors.log
     if args.verify:
-        os.makedirs(results_folder + file_path, exist_ok=True)
-        with open(results_folder + file_path + "\\errors.log", "a+") as outfile:
+        os.makedirs(results_folder + proj_name, exist_ok=True)
+        with open(results_folder + proj_name + "\\errors.log", "a+") as outfile:
             for error in errors:
                 outfile.write(infile.name + ": " + error + "\n")
-
-    filename = os.path.basename(infile.name)
     
     if len(errors) == 0:
         curr_position = [1, 1]
@@ -84,7 +89,7 @@ def finish_file(file_path, infile, tokens, errors):
     else:
         print(f"Errors found in {filename}, use -v and check errors.log")
 
-def scan_file(filename, file_path=""):
+def scan_file(filename, proj_name="", file_path=""):
     if file_path != "":
         file_path += "\\"
 
@@ -94,19 +99,28 @@ def scan_file(filename, file_path=""):
         tokens, errors = tokenize(data)
 
         if file_path == "":
-            finish_file(infile.name, infile, tokens, errors)
+            finish_file(infile.name, "", infile, tokens, errors)
         else:
-            finish_file(file_path, infile, tokens, errors)
+            finish_file(file_path, proj_name, infile, tokens, errors)
 
 if args.file:
     scan_file(args.file)
 
 if args.directory:
+    if args.directory[-1] != "/":
+        args.directory += "/"
+
     for item in os.listdir(args.directory):
         if item[-(1 + len(extention)):] == "." + extention:   #only check files with specified extention
-            scan_file(item, args.directory)
+            proj_name = os.path.basename(os.path.dirname(args.directory))
+            print(proj_name)
+            scan_file(item, proj_name, args.directory)
 
 if args.project:
+    if args.project[-1] != "/":
+        args.project += "/"
+
     for path, dirs, files in os.walk(args.project):
         for filename in files:
-            scan_file(filename, path)
+            proj_name = os.path.basename(os.path.dirname(args.project))
+            scan_file(filename, proj_name, path)
