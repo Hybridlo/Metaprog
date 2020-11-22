@@ -80,6 +80,9 @@ def finish_file(file_path, infile, tokens, errors):
 
                     outfile.write(res_str)
                     outfile.flush()
+    
+    else:
+        print(f"Errors found in {filename}, use -v and check errors.log")
 
 def scan_file(filename, file_path=""):
     if file_path != "":
