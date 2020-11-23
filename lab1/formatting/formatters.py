@@ -646,7 +646,7 @@ def newline_after_tokens(tokens, curr_token_index, config):
     newline_tokens = ["SEMICOLON", "T_OPEN_TAG", "T_OPEN_TAG_WITH_ECHO", "BRACKET_OPEN", "BRACKET_CLOSE", "T_DOC_COMMENT"]
 
     res = {"newlines_before": 0, "newlines_after": 0}
-    
+
     if tokens[curr_token_index] in newline_tokens and not check_semicolon_in_for(tokens, curr_token_index):
         res["newlines_after"] += 1
 
@@ -657,7 +657,7 @@ def space_after_tokens(tokens, curr_token_index, config):
 
     space_tokens_after = ["T_RETURN", "T_YIELD", "T_AS", "T_NAMESPACE", "T_REQUIRE",
                           "T_NEW", "T_CLASS", "T_PRIVATE", "T_PROTECTED", "T_PUBLIC",
-                          "T_ABSTRACT", "T_FINAL"]
+                          "T_ABSTRACT", "T_FINAL", "T_USE", "T_CONST", "T_VAR", "T_ECHO"]
     space_tokens_before = ["T_AS", "T_ELSEIF"]
 
     res = {"spaces_before": 0, "spaces_after": 0}
@@ -822,11 +822,14 @@ def min_after_class_body(tokens, curr_token_index, config):
     return res
 
 def min_around_field(tokens, curr_token_index, config):
-    """Get min newlines after class field declaration"""
+    """Get min newlines before class field declaration"""
 
     res = {"min_newlines": -1}
 
-    if check_end_of_keyword(tokens, curr_token_index, "T_VAR") and check_in_block(tokens, curr_token_index, "T_CLASS"):
+    if len(tokens) == curr_token_index + 1:
+        return res
+
+    if tokens[curr_token_index+1] == "T_VAR" and check_in_block(tokens, curr_token_index, "T_CLASS"):
         res["min_newlines"] = int(config["Blank Lines"]["Around field"])
 
     return res
@@ -850,7 +853,7 @@ def min_before_method_body(tokens, curr_token_index, config):
     res = {"min_newlines": -1}
 
     if (check_after_function_declaration(tokens, curr_token_index, "BRACKET_OPEN")
-        and check_in_block(tokens, curr_token_index, "T_CLASS")):
+        and check_in_block(tokens, curr_token_index, "T_CLASS", 2)):
 
         res["min_newlines"] = int(config["Blank Lines"]["Before method body"])
 
@@ -886,9 +889,6 @@ def min_after_function(tokens, curr_token_index, config):
     """Get min newlines after function (not in class)"""
     
     res = {"min_newlines": -1}
-
-    if len(tokens) == curr_token_index + 1:
-        return res
 
     if check_func_right_brace(tokens, curr_token_index) and not check_in_block(tokens, curr_token_index, "T_CLASS"):
         res["min_newlines"] = int(config["Blank Lines"]["After function"])

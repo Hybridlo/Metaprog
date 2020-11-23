@@ -180,25 +180,19 @@ def check_left_brace_after_token(tokens, curr_token_index, needed_token):
     nesting = 0
 
     while True:
-        if i < 0:
+        if i < 1:
             return False
 
         if tokens[i] == "R_PARENTHESES_CLOSE":
             nesting += 1
-            i -= 1
-            continue
         elif tokens[i] == "R_PARENTHESES_OPEN":
             nesting -= 1
-            i -= 1
-            continue
-        elif nesting > 0:
-            i -= 1
-            continue
+        
+        
+        if nesting == 0:       #nesting == 0, current token at i must be the needed one
+            return tokens[i] == needed_token
 
-        elif tokens[i] == needed_token:
-            return True
-
-        return False    #invalid token found with parentheses closed
+        i -= 1
 
 def check_left_parentheses_after_func_decl(tokens, curr_token_index):
     """Check if current token is opening
@@ -228,25 +222,19 @@ def check_right_parentheses_after_func_decl(tokens, curr_token_index):
     nesting = 1
 
     while True:
-        if i < 0:
+        if i < 1:
             return False
 
         if tokens[i] == "R_PARENTHESES_CLOSE":
             nesting += 1
-            i -= 1
-            continue
         elif tokens[i] == "R_PARENTHESES_OPEN":
             nesting -= 1
-            i -= 1
-            continue
-        elif nesting > 0:
-            i -= 1
-            continue
+        
+        
+        if nesting == 0:       #nesting == 0, current token at i must be an idetifier string and the one before - T_FUNCTION
+            return tokens[i] == "T_STRING" and tokens[i-1] == "T_FUNCTION"
 
-        elif tokens[i] == "T_STRING" and tokens[i-1] == "T_FUNCTION":
-            return True
-
-        return False    #invalid token found with parentheses closed
+        i -= 1
 
 def check_if_left_parentheses_after_token(tokens, curr_token_index, needed_token):
     """Check if current token is opening
@@ -280,20 +268,14 @@ def check_if_right_parentheses_after_token(tokens, curr_token_index, needed_toke
 
         if tokens[i] == "R_PARENTHESES_CLOSE":
             nesting += 1
-            i -= 1
-            continue
         elif tokens[i] == "R_PARENTHESES_OPEN":
             nesting -= 1
-            i -= 1
-            continue
-        elif nesting > 0:
-            i -= 1
-            continue
+        
+        
+        if nesting == 0:       #nesting == 0, current token at i must be the one searched for
+            return tokens[i] == needed_token
 
-        elif tokens[i] == needed_token:
-            return True
-
-        return False    #invalid token found with parentheses closed
+        i -= 1
 
 def check_if_colon_in_ternary(tokens, curr_token_index):
     """Check if current token is a colon in ternary operator"""
@@ -328,20 +310,14 @@ def check_semicolon_in_for(tokens, curr_token_index):
 
         if tokens[i] == "R_PARENTHESES_CLOSE":
             nesting += 1
-            i -= 1
-            continue
         elif tokens[i] == "R_PARENTHESES_OPEN":
             nesting -= 1
-            i -= 1
-            continue
-        elif nesting > 0:
-            i -= 1
-            continue
+        
+        
+        if nesting == 0:       #nesting == 0, current token at i must be T_FOR
+            return tokens[i] == "T_FOR"
 
-        elif tokens[i] == "T_FOR":
-            return True
-
-        return False    #invalid token found with parentheses closed
+        i -= 1
 
 def check_type_cast(tokens, curr_token_index):
     """Check if token is type cast"""
@@ -379,20 +355,14 @@ def check_if_token_paired(tokens, curr_token_index, interest_token, pair_token, 
 
         if tokens[i] == "BRACKET_CLOSE":
             nesting += 1
-            i -= 1
-            continue
         elif tokens[i] == "BRACKET_OPEN":
             nesting -= 1
-            i -= 1
-            continue
-        elif nesting > 0 or tokens[i] in skip_tokens:
-            i -= 1
-            continue
+        
+        #nesting == 0, current token at i must be opening second of pair; skip if token at i is skip token
+        if nesting == 0 and not tokens[i] in skip_tokens:       
+            return tokens[i] == pair_token
 
-        elif tokens[i] == pair_token:
-            return True
-
-        return False    #invalid token found with parentheses closed
+        i -= 1
 
 def check_if_in_case_branch(tokens, curr_token_index):
     """Checks if token is in case branch, skipping {} blocks"""
@@ -405,17 +375,13 @@ def check_if_in_case_branch(tokens, curr_token_index):
 
         if tokens[i] == "BRACKET_CLOSE":
             nesting += 1
-            i -= 1
-            continue
         elif tokens[i] == "BRACKET_OPEN":
             nesting -= 1
-            i -= 1
-            continue
-        elif nesting > 0:
-            i -= 1
-            continue
-        elif tokens[i] == "T_CASE":
-            return True
+
+        if nesting == 0:       #nesting == 0, current token at i must be opening bracket
+            return tokens[i] == "T_CASE"
+
+        i -= 1
 
 def check_mod_before_func_or_class(tokens, curr_token_index):
     if curr_token_index + 1 == len(tokens):
@@ -459,17 +425,13 @@ def check_class_decl_right_brace(tokens, curr_token_index):
 
         if tokens[i] == "BRACKET_CLOSE":
             nesting += 1
-            i -= 1
-            continue
         elif tokens[i] == "BRACKET_OPEN":
             nesting -= 1
-            i -= 1
-            continue
-        elif nesting > 0:
-            i -= 1
-            continue
-        else:       #nesting == 0, current token must be opening bracket before class decl
+
+        if nesting == 0:       #nesting == 0, current token at i must be opening bracket
             return check_class_decl_left_brace(tokens, i)
+
+        i -= 1
 
 def check_end_of_keyword(tokens, curr_token_index, keyword_token):
     """Check if current token ends keyword line"""
@@ -490,11 +452,12 @@ def check_end_of_keyword(tokens, curr_token_index, keyword_token):
 
         i -= 1
 
-def check_in_block(tokens, curr_token_index, block_keyword):
-    """checks if current token is in specified keyword block"""
+def check_in_block(tokens, curr_token_index, block_keyword, start_nesting=1):
+    """checks if current token is in specified keyword block
+    start_nesting is used for checking class method with value of 2"""
 
-    i = curr_token_index - 1
-    nesting = 1
+    i = curr_token_index
+    nesting = start_nesting
 
     while True:
         if i < 0:
@@ -532,14 +495,10 @@ def check_func_right_brace(tokens, curr_token_index):
 
         if tokens[i] == "BRACKET_CLOSE":
             nesting += 1
-            i -= 1
-            continue
         elif tokens[i] == "BRACKET_OPEN":
             nesting -= 1
-            i -= 1
-            continue
-        elif nesting > 0:
-            i -= 1
-            continue
-        else:       #nesting == 0, current token must be opening bracket before function decl
-            return check_after_function_declaration(tokens, curr_token_index, "BRACKET_OPEN")
+
+        if nesting == 0:       #nesting == 0, current token must be opening bracket before function decl
+            return check_after_function_declaration(tokens, i, "BRACKET_OPEN")
+
+        i -= 1
