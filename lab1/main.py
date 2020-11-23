@@ -3,10 +3,10 @@ from formatting.formatters import all_formatters
 from formatting.options import Options
 
 import argparse
-import os
+from pathlib import Path
 
 #folder to store results
-results_folder = "results/"
+results_folder = Path("results/")
 
 #specify file extention of interest
 extention = "php"
@@ -28,27 +28,27 @@ if args.template:
     config = Options(args.template)
 
 #apply -v and -f to tokenized file
-def finish_file(proj_path, proj_name, infile, tokens, errors):
-    file_in_proj_path = os.path.relpath(proj_path, os.path.dirname(infile.name))
-    file_path = proj_name + file_in_proj_path
-    filename = os.path.basename(infile.name)
-
-    if proj_name == "":
-        proj_name = filename
+def finish_file(filepath, proj_path, tokens, errors):
+    file_in_proj_path = filepath.relative_to(proj_path)
+    proj_name = proj_path.parts[-1]
 
     #print errors to errors.log
     if args.verify:
-        os.makedirs(results_folder + proj_name, exist_ok=True)
-        with open(results_folder + proj_name + "\\errors.log", "a+") as outfile:
+        proj_result = results_folder / proj_name
+        proj_result.mkdir(exist_ok=True)
+
+        with open(proj_result / "errors.log", "a+") as outfile:
             for error in errors:
-                outfile.write(infile.name + ": " + error + "\n")
+                outfile.write(filepath + ": " + error + "\n")
     
     if len(errors) == 0:
         curr_position = [1, 1]
 
         if args.template:
-            os.makedirs(results_folder + file_path, exist_ok=True)
-            with open(results_folder + file_path + "\\" + filename, "w+") as outfile:
+            file_in_proj_result = results_folder / proj_name / file_in_proj_path
+            file_in_proj_result.parent.mkdir(exist_ok=True)
+
+            with open(file_in_proj_result, "w+") as outfile:
                 for i in range(len(tokens)):
                     adjustments = {"spaces_before": 0, "spaces_after": 0, "newlines_before": 0, "newlines_after": 0}
                     tokens[i].position = tuple(curr_position)      #to track newlines properly
@@ -87,40 +87,34 @@ def finish_file(proj_path, proj_name, infile, tokens, errors):
                     outfile.flush()
     
     else:
-        print(f"Errors found in {filename}, use -v and check errors.log")
+        print(f"Errors found in {filepath}, use -v and check errors.log")
 
-def scan_file(filename, proj_name="", file_path=""):
-    if file_path != "":
-        file_path += "\\"
+def scan_file(filepath, proj_path=""):
 
-    with open(file_path + filename, "r") as infile:
+    with open(filepath, "r") as infile:
         data = infile.read()
 
         tokens, errors = tokenize(data)
 
-        if file_path == "":
-            finish_file(infile.name, "", infile, tokens, errors)
-        else:
-            finish_file(file_path, proj_name, infile, tokens, errors)
+        finish_file(filepath, proj_path, tokens, errors)
 
 if args.file:
     scan_file(args.file)
 
 if args.directory:
-    if args.directory[-1] != "/":
-        args.directory += "/"
+    directory = Path(args.directory)
 
-    for item in os.listdir(args.directory):
-        if item[-(1 + len(extention)):] == "." + extention:   #only check files with specified extention
-            proj_name = os.path.basename(os.path.dirname(args.directory))
-            print(proj_name)
-            scan_file(item, proj_name, args.directory)
+    if not directory.exists():
+        raise FileNotFoundError("Directory not found")
+
+    for filepath in directory.glob("*." + extention):
+        scan_file(filepath, directory)
 
 if args.project:
-    if args.project[-1] != "/":
-        args.project += "/"
+    project = Path(args.project)
 
-    for path, dirs, files in os.walk(args.project):
-        for filename in files:
-            proj_name = os.path.basename(os.path.dirname(args.project))
-            scan_file(filename, proj_name, path)
+    if not project.exists():
+        raise FileNotFoundError("Project directory not found")
+
+    for filepath in project.glob("**/*." + extention):
+        scan_file(filepath, project)

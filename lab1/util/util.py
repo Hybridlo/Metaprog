@@ -39,12 +39,14 @@ def continues_previous_line(tokens, curr_token_index):
         return False
 
     prev_token = tokens[curr_token_index-1]
+    curr_token = tokens[curr_token_index]
 
     tokens_dont_continue = ["SEMICOLON", "T_TAG", "T_OPEN_TAG", "T_OPEN_TAG_WITH_ECHO", "R_PARENTHESES_OPEN", "S_PARENTHESES_OPEN",
                             "BRACKET_OPEN", "BRACKET_CLOSE", "T_COMMENT", "T_DOC_COMMENT",
                            ]
 
-    if prev_token not in tokens_dont_continue:
+    #functions can be declared on newline after modifiers, doesn't count as continuation
+    if prev_token not in tokens_dont_continue and curr_token != "T_FUNCTION":
         return True
     
     return False
@@ -146,7 +148,8 @@ def check_class_declaration(tokens, curr_token_index):
 def check_after_function_declaration(tokens, curr_token_index, needed_token):
     """Check current token and is after function declaration;
     function declaration can have these tokens:
-    COLON, T_STRING, T_VARIABLE, COMMA, R_PARENTHESES_OPEN, R_PARENTHESES_CLOSE, T_FUNCTION"""
+    COLON, T_STRING, T_VARIABLE, COMMA, R_PARENTHESES_OPEN, R_PARENTHESES_CLOSE, T_FUNCTION,
+    EQUAL, T_LNUMBER, T_DNUMBER"""
     if tokens[curr_token_index] != needed_token:
         return False
 
@@ -156,7 +159,8 @@ def check_after_function_declaration(tokens, curr_token_index, needed_token):
         if i < 0:
             return False
 
-        if tokens[i] in ["COLON", "T_STRING", "T_VARIABLE", "COMMA", "R_PARENTHESES_OPEN", "R_PARENTHESES_CLOSE"]:
+        if tokens[i] in ["COLON", "T_STRING", "T_VARIABLE", "COMMA", "R_PARENTHESES_OPEN",
+                         "R_PARENTHESES_CLOSE", "EQUAL", "T_LNUMBER", "T_DNUMBER"]:
             i -= 1
             continue
 
@@ -413,19 +417,22 @@ def check_if_in_case_branch(tokens, curr_token_index):
         elif tokens[i] == "T_CASE":
             return True
 
-def check_func_or_class_with_mods(tokens, curr_token_index):
-    if curr_token_index == 0:
+def check_mod_before_func_or_class(tokens, curr_token_index):
+    if curr_token_index + 1 == len(tokens):
         return False
 
     modifier_list = ["T_PRIVATE", "T_PROTECTED", "T_PUBLIC", "T_ABSTRACT", "T_FINAL"]
 
-    if tokens[curr_token_index] in ["T_FUNCTION", "T_CLASS"] and tokens[curr_token_index-1] in modifier_list:
+    curr_token = tokens[curr_token_index]
+    next_token = tokens[curr_token_index+1]
+
+    if curr_token in modifier_list and next_token in ["T_FUNCTION", "T_CLASS"]:
         return True
 
     return False
 
 def check_string_after_var(tokens, curr_token_index):
-    if len(tokens) == curr_token_index - 1:
+    if len(tokens) == curr_token_index + 1:
         return False
 
     curr_token = tokens[curr_token_index]

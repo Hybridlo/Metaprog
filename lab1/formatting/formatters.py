@@ -634,8 +634,8 @@ def wrap_after_mods_list(tokens, curr_token_index, config):
     res = {"newlines_before": 0, "newlines_after": 0}
 
     if config["Wrapping and Braces"]["Wrap after modifier list"] == "True":
-        if check_func_or_class_with_mods(tokens, curr_token_index):
-            res["newlines_before"] += 1
+        if check_mod_before_func_or_class(tokens, curr_token_index):
+            res["newlines_after"] += 1
 
     return res
 
@@ -659,7 +659,7 @@ def space_after_tokens(tokens, curr_token_index, config):
 
     space_tokens_after = ["T_RETURN", "T_YIELD", "T_AS", "T_NAMESPACE", "T_REQUIRE",
                           "T_NEW", "T_CLASS", "T_PRIVATE", "T_PROTECTED", "T_PUBLIC",
-                          "T_ABSTRACT"]
+                          "T_ABSTRACT", "T_FINAL"]
     space_tokens_before = ["T_AS"]
 
     res = {"spaces_before": 0, "spaces_after": 0}
