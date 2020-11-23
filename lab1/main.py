@@ -36,6 +36,9 @@ def apply_min(adjustments, tokens, i):
     
     adjustments["newlines_after"] = max(adjustments["min_newlines"]+1, user_newlines)
 
+    if tokens[i].in_code.endswith("\n"):        #account for newlines in single line comments
+        adjustments["newlines_after"] -= 1
+
 def apply_max(adjustments, tokens, i):
     """if user put too many newlines, remove as much as needed"""
     if len(tokens) == i + 1:
@@ -44,6 +47,9 @@ def apply_max(adjustments, tokens, i):
     user_newlines = tokens[i+1].pos_in_code[0] - tokens[i].pos_in_code[0]
     
     adjustments["newlines_after"] = min(adjustments["max_newlines"]+1, user_newlines)
+
+    if tokens[i].in_code.endswith("\n"):        #account for newlines in single line comments
+        adjustments["newlines_after"] -= 1
 
 def format_file(outfile, tokens):
     curr_position = [1, 1]
@@ -77,7 +83,6 @@ def format_file(outfile, tokens):
 
         if do_apply_min:
             apply_min(adjustments, tokens, i)
-
 
         res_str = tokens[i].in_code
         res_str = "\n" * adjustments["newlines_before"] + res_str
@@ -114,7 +119,7 @@ def finish_file(filepath, errors_file, tokens, errors):
         results_folder.mkdir(exist_ok=True)
         
         for error in errors:
-            errors_file.write(filepath + ": " + error + "\n")
+            errors_file.write(str(filepath) + ": " + error + "\n")
     
     if len(errors) == 0:
         if args.template:
