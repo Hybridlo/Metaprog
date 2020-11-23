@@ -3,7 +3,7 @@ from .tokens import detect_token
 class Token:
     """A class to hold token information"""
 
-    def __init__(self, token, in_code, position):
+    def __init__(self, token, in_code, pos_in_code):
         """
         token: string with a token, gotten from
         tokens dictionary in tokens.py
@@ -16,7 +16,8 @@ class Token:
         """
         self.token = token
         self.in_code = in_code
-        self.position = position
+        self.pos_in_code = pos_in_code      #before formatting
+        self.position = None                #after formatting
 
     def __eq__(self, other):
         if isinstance(other, Token):

@@ -56,7 +56,7 @@ def check_if_func_declared(tokens, curr_token_index):
     Function declaration defined as next token sequence:
     T_FUNCTION, T_STRING, R_PARENTHESES_OPEN"""
 
-    if curr_token_index == 0 or len(tokens) == curr_token_index - 1:
+    if curr_token_index == 0 or len(tokens) == curr_token_index + 1:
         return False
 
     curr_token = tokens[curr_token_index]
@@ -75,7 +75,7 @@ def check_if_func_call(tokens, curr_token_index):
     Function call defined as next token sequence:
     not T_FUNCTION, T_STRING, R_PARENTHESES_OPEN"""
 
-    if curr_token_index == 0 or len(tokens) == curr_token_index - 1:
+    if curr_token_index == 0 or len(tokens) == curr_token_index + 1:
         return False
 
     curr_token = tokens[curr_token_index]
@@ -123,7 +123,7 @@ def check_assign_in_declare(tokens, curr_token_index):
 
     return False
 
-def check_class_declaration(tokens, curr_token_index):
+def check_class_decl_left_brace(tokens, curr_token_index):
     """Check if current token is left brace and after class declaration;
     class declaration can have these tokens:
     T_STRING, COMMA, T_IMPLEMENTS, T_EXTENDS, T_CLASS"""
@@ -349,7 +349,7 @@ def check_type_cast(tokens, curr_token_index):
     if tokens[curr_token_index] in ["T_ARRAY_CAST", "T_BOOL_CAST", "T_DOUBLE_CAST", "T_INT_CAST", "T_OBJECT_CAST", "T_STRING_CAST", "T_UNSET_CAST"]:
         return True
 
-    if curr_token_index == 0 or len(tokens) == curr_token_index - 1:
+    if curr_token_index == 0 or len(tokens) == curr_token_index + 1:
         return False
 
     curr_token = tokens[curr_token_index]
@@ -442,3 +442,104 @@ def check_string_after_var(tokens, curr_token_index):
         return True
 
     return False
+
+def check_class_decl_right_brace(tokens, curr_token_index):
+    """checks for closing bracket that is part
+    of class declaration"""
+
+    if tokens[curr_token_index] != "BRACKET_CLOSE":
+        return False
+
+    i = curr_token_index - 1
+    nesting = 1
+
+    while True:
+        if i < 0:
+            return False
+
+        if tokens[i] == "BRACKET_CLOSE":
+            nesting += 1
+            i -= 1
+            continue
+        elif tokens[i] == "BRACKET_OPEN":
+            nesting -= 1
+            i -= 1
+            continue
+        elif nesting > 0:
+            i -= 1
+            continue
+        else:       #nesting == 0, current token must be opening bracket before class decl
+            return check_class_decl_left_brace(tokens, i)
+
+def check_end_of_keyword(tokens, curr_token_index, keyword_token):
+    """Check if current token ends keyword line"""
+    if tokens[curr_token_index] != "SEMICOLON":
+        return False
+
+    i = curr_token_index - 1
+
+    while True:
+        if i < 0:
+            return False
+
+        if tokens[i] == "SEMICOLON":
+            return False
+
+        elif tokens[i] == keyword_token:       #found keyword on this line
+            return True
+
+        i -= 1
+
+def check_in_block(tokens, curr_token_index, block_keyword):
+    """checks if current token is in specified keyword block"""
+
+    i = curr_token_index - 1
+    nesting = 1
+
+    while True:
+        if i < 0:
+            return False
+
+        if tokens[i] == "BRACKET_CLOSE":
+            nesting += 1
+        elif tokens[i] == "BRACKET_OPEN":
+            nesting -= 1
+
+        if nesting == 0:       #nesting == 0, current token at i must be opening bracket
+            if block_keyword == "T_FUNCTION":
+                return check_after_function_declaration(tokens, i, "BRACKET_OPEN")
+
+            if block_keyword == "T_CLASS":
+                return check_class_decl_left_brace(tokens, i)
+
+            return False
+
+        i -= 1
+
+def check_func_right_brace(tokens, curr_token_index):
+    """checks for closing bracket that is part
+    of function declaration"""
+
+    if tokens[curr_token_index] != "BRACKET_CLOSE":
+        return False
+
+    i = curr_token_index - 1
+    nesting = 1
+
+    while True:
+        if i < 0:
+            return False
+
+        if tokens[i] == "BRACKET_CLOSE":
+            nesting += 1
+            i -= 1
+            continue
+        elif tokens[i] == "BRACKET_OPEN":
+            nesting -= 1
+            i -= 1
+            continue
+        elif nesting > 0:
+            i -= 1
+            continue
+        else:       #nesting == 0, current token must be opening bracket before function decl
+            return check_after_function_declaration(tokens, curr_token_index, "BRACKET_OPEN")

@@ -148,7 +148,7 @@ def class_declaration_left_brace(tokens, curr_token_index, config):
     res = {"spaces_before": 0, "spaces_after": 0}
 
     if (config["Spaces"]["Class left brace"] == "True" 
-        and check_class_declaration(tokens, curr_token_index)):
+        and check_class_decl_left_brace(tokens, curr_token_index)):
         res["spaces_before"] += 1
 
     return res
@@ -682,6 +682,224 @@ def space_between_strings_and_var(tokens, curr_token_index, config):
 
     return res
 
+#Blank lines max
+def max_in_decl(tokens, curr_token_index, config):
+    """Get max newlines after }"""
+
+    res = {"max_newlines": -1}
+
+    if tokens[curr_token_index] == "BRACKET_CLOSE":
+        res["max_newlines"] = int(config["Blank Lines"]["In declarations"])
+
+    return res
+
+def max_in_code(tokens, curr_token_index, config):
+    """Get max newlines after ;"""
+
+    res = {"max_newlines": -1}
+
+    if tokens[curr_token_index] == "SEMICOLON":
+        print(curr_token_index, check_in_block(tokens, curr_token_index, "T_FUNCTION"))
+
+    if tokens[curr_token_index] == "SEMICOLON" and check_in_block(tokens, curr_token_index, "T_FUNCTION"):
+        res["max_newlines"] = int(config["Blank Lines"]["In code"])
+
+    return res
+
+def max_after_open_bracket(tokens, curr_token_index, config):
+    """Get max newlines for lines after {"""
+
+    res = {"max_newlines": -1}
+
+    if tokens[curr_token_index] == "BRACKET_OPEN":
+        res["max_newlines"] = int(config["Blank Lines"]["After '{'"])
+
+    return res
+
+def max_before_close_bracket(tokens, curr_token_index, config):
+    """Get max newlines for lines before }"""
+
+    res = {"max_newlines": -1}
+
+    if len(tokens) == curr_token_index + 1:
+        return res
+
+    if tokens[curr_token_index+1] == "BRACKET_CLOSE":
+        res["max_newlines"] = int(config["Blank Lines"]["Before '}'"])
+
+    return res
+
+#Blank lines min
+def min_after_opening_tag(tokens, curr_token_index, config):
+    """Get min newlines after opening tags"""
+
+    res = {"min_newlines": -1}
+
+    if tokens[curr_token_index] in ["T_OPEN_TAG", "T_OPEN_TAG_WITH_ECHO"]:
+        res["min_newlines"] = int(config["Blank Lines"]["After opening tag"])
+
+    return res
+    
+def min_before_namespace(tokens, curr_token_index, config):
+    """Get min newlines before namespace"""
+
+    res = {"min_newlines": -1}
+
+    if len(tokens) == curr_token_index + 1:
+        return res
+
+    if tokens[curr_token_index+1] == "T_NAMESPACE":
+        res["min_newlines"] = int(config["Blank Lines"]["Before namespace"])
+
+    return res
+
+def min_after_namespace(tokens, curr_token_index, config):
+    """Get min newlines after namespace"""
+
+    res = {"min_newlines": -1}
+
+    if check_end_of_keyword(tokens, curr_token_index, "T_NAMESPACE"):
+        res["min_newlines"] = int(config["Blank Lines"]["After namespace"])
+
+    return res
+
+def min_before_use_statements(tokens, curr_token_index, config):
+    """Get min newlines before use statements"""
+
+    res = {"min_newlines": -1}
+
+    if len(tokens) == curr_token_index + 1:
+        return res
+
+    #this line did not start use statements, but next one does
+    if (tokens[curr_token_index] == "SEMICOLON" and not check_end_of_keyword(tokens, curr_token_index, "T_USE")
+        and tokens[curr_token_index+1] == "T_USE"):
+        res["min_newlines"] = int(config["Blank Lines"]["Before 'Use' statements"])
+
+    return res
+
+def min_after_use_statements(tokens, curr_token_index, config):
+    """Get min newlines after use statements"""
+
+    res = {"min_newlines": -1}
+
+    if len(tokens) == curr_token_index + 1:
+        return res
+
+    #this line did start use statements, but next one does not
+    if (tokens[curr_token_index] == "SEMICOLON" and check_end_of_keyword(tokens, curr_token_index, "T_USE")
+        and not tokens[curr_token_index+1] == "T_USE"):
+        res["min_newlines"] = int(config["Blank Lines"]["After 'Use' statements"])
+
+    return res
+
+def min_around_class(tokens, curr_token_index, config):
+    """Get min newlines after class block"""
+
+    res = {"min_newlines": -1}
+
+    if check_class_decl_right_brace(tokens, curr_token_index):
+        res["min_newlines"] = int(config["Blank Lines"]["Around class"])
+
+    return res
+
+def min_before_class_body(tokens, curr_token_index, config):
+    """Get min newlines after { in class"""
+
+    res = {"min_newlines": -1}
+
+    if check_class_decl_left_brace(tokens, curr_token_index):
+        res["min_newlines"] = int(config["Blank Lines"]["Before class body"])
+
+    return res
+
+def min_after_class_body(tokens, curr_token_index, config):
+    """Get min newlines before } in class"""
+
+    res = {"min_newlines": -1}
+
+    if len(tokens) == curr_token_index + 1:
+        return res
+
+    if check_class_decl_right_brace(tokens, curr_token_index+1):
+        res["min_newlines"] = int(config["Blank Lines"]["After class body"])
+
+    return res
+
+def min_around_field(tokens, curr_token_index, config):
+    """Get min newlines after class field declaration"""
+
+    res = {"min_newlines": -1}
+
+    if check_end_of_keyword(tokens, curr_token_index, "T_VAR") and check_in_block(tokens, curr_token_index, "T_CLASS"):
+        res["min_newlines"] = int(config["Blank Lines"]["Around field"])
+
+    return res
+
+def min_around_method(tokens, curr_token_index, config):
+    """Get min newlines before class method declaration"""
+
+    res = {"min_newlines": -1}
+
+    if len(tokens) == curr_token_index + 1:
+        return res
+
+    if tokens[curr_token_index+1] == "T_FUNCTION" and check_in_block(tokens, curr_token_index, "T_CLASS"):
+        res["min_newlines"] = int(config["Blank Lines"]["Around method"])
+
+    return res
+
+def min_before_method_body(tokens, curr_token_index, config):
+    """Get min newlines after method {"""
+
+    res = {"min_newlines": -1}
+
+    if (check_after_function_declaration(tokens, curr_token_index, "BRACKET_OPEN")
+        and check_in_block(tokens, curr_token_index, "T_CLASS")):
+
+        res["min_newlines"] = int(config["Blank Lines"]["Before method body"])
+
+    return res
+
+def min_before_return(tokens, curr_token_index, config):
+    """Get min newlines before return"""
+
+    res = {"min_newlines": -1}
+
+    if len(tokens) == curr_token_index + 1:
+        return res
+
+    if tokens[curr_token_index+1] == "T_RETURN":
+        res["min_newlines"] = int(config["Blank Lines"]["Before return statement"])
+
+    return res
+
+def min_around_class_constants(tokens, curr_token_index, config):
+    """Get min newlines after class constant"""
+    
+    res = {"min_newlines": -1}
+
+    if len(tokens) == curr_token_index + 1:
+        return res
+
+    if check_end_of_keyword(tokens, curr_token_index, "T_CONST") and check_in_block(tokens, curr_token_index, "T_CLASS"):
+        res["min_newlines"] = int(config["Blank Lines"]["Around class constants"])
+
+    return res
+
+def min_after_function(tokens, curr_token_index, config):
+    """Get min newlines after function (not in class)"""
+    
+    res = {"min_newlines": -1}
+
+    if len(tokens) == curr_token_index + 1:
+        return res
+
+    if check_func_right_brace(tokens, curr_token_index) and not check_in_block(tokens, curr_token_index, "T_CLASS"):
+        res["min_newlines"] = int(config["Blank Lines"]["After function"])
+
+    return res
+
 all_formatters = [
     apply_indent,
     apply_continue_indent,
@@ -793,4 +1011,24 @@ all_formatters = [
     newline_after_tokens,
     space_after_tokens,
     space_between_strings_and_var,
+
+    max_after_open_bracket,
+    max_before_close_bracket,
+    max_in_code,
+    max_in_decl,
+
+    min_after_class_body,
+    min_after_function,
+    min_after_namespace,
+    min_after_opening_tag,
+    min_after_use_statements,
+    min_around_class,
+    min_around_class_constants,
+    min_around_field,
+    min_around_method,
+    min_before_class_body,
+    min_before_method_body,
+    min_before_return,
+    min_before_use_statements,
+    min_before_namespace,
 ]
