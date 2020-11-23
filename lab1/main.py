@@ -28,27 +28,20 @@ if args.template:
     config = Options(args.template)
 
 #apply -v and -f to tokenized file
-def finish_file(filepath, proj_path, tokens, errors):
-    file_in_proj_path = filepath.relative_to(proj_path)
-    proj_name = proj_path.parts[-1]
+def finish_file(filepath, errors_file, tokens, errors):
 
     #print errors to errors.log
     if args.verify:
-        proj_result = results_folder / proj_name
-        proj_result.mkdir(exist_ok=True)
-
-        with open(proj_result / "errors.log", "a+") as outfile:
-            for error in errors:
-                outfile.write(filepath + ": " + error + "\n")
+        results_folder.mkdir(exist_ok=True)
+        
+        for error in errors:
+            errors_file.write(filepath + ": " + error + "\n")
     
     if len(errors) == 0:
         curr_position = [1, 1]
 
         if args.template:
-            file_in_proj_result = results_folder / proj_name / file_in_proj_path
-            file_in_proj_result.parent.mkdir(exist_ok=True)
-
-            with open(file_in_proj_result, "w+") as outfile:
+            with open(filepath, "w+") as outfile:
                 for i in range(len(tokens)):
                     adjustments = {"spaces_before": 0, "spaces_after": 0, "newlines_before": 0, "newlines_after": 0}
                     tokens[i].position = tuple(curr_position)      #to track newlines properly
@@ -87,34 +80,36 @@ def finish_file(filepath, proj_path, tokens, errors):
                     outfile.flush()
     
     else:
-        print(f"Errors found in {filepath}, use -v and check errors.log")
+        print(f"Errors found in {filepath}, use -v and check results/errors.log")
 
-def scan_file(filepath, proj_path=""):
-
+def scan_file(filepath, errors_file):
     with open(filepath, "r") as infile:
         data = infile.read()
 
         tokens, errors = tokenize(data)
 
-        finish_file(filepath, proj_path, tokens, errors)
+        finish_file(filepath, errors_file, tokens, errors)
 
 if args.file:
-    scan_file(args.file)
+    outfile = open(results_folder / "errors.log", "a+")
+    scan_file(args.file, outfile)
 
 if args.directory:
     directory = Path(args.directory)
+    outfile = open(results_folder / "errors.log", "a+")
 
     if not directory.exists():
         raise FileNotFoundError("Directory not found")
 
     for filepath in directory.glob("*." + extention):
-        scan_file(filepath, directory)
+        scan_file(filepath, outfile)
 
 if args.project:
     project = Path(args.project)
+    outfile = open(results_folder / "errors.log", "a+")
 
     if not project.exists():
         raise FileNotFoundError("Project directory not found")
 
     for filepath in project.glob("**/*." + extention):
-        scan_file(filepath, project)
+        scan_file(filepath, outfile)
