@@ -23,6 +23,20 @@ args = arg_parser.parse_args()
 def scan_and_fix_file(filepath, outname):
     with open(filepath, "r") as infile:
         data = infile.read()
+        verify = None
+        fixing = None
+
+        if args.verify:
+            verify = open(results_folder / (outname + "_verification.log"))
+
+        if args.fix:
+            fixing = open(results_folder / (outname + "_fixing.log"))
+
+        #exit without doing anything if both none
+        if verify == None and fixing == None:
+            return
+
+        
 
 
 if args.file:
