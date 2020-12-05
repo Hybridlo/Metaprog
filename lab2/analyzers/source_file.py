@@ -11,7 +11,7 @@ def check_filename(verif_file, fix_file, filepath, file_data, filename):
 
     for i in range(0, len(file_data)):
         # check for class keyword
-        if check_word_with_space(file_data[i:], "class"):
+        if check_word_with_space(file_data[i:], "class") and not check_word_with_space(file_data[i:], "class var"):
             types.append(read_next_word(file_data[i+6:]))
 
         # check struct keyword

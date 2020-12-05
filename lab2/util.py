@@ -206,3 +206,39 @@ def apply_init_changes(file_data, symbols_in_parentheses, vars_directly_assigned
     new_file_data += unprocessed
 
     return new_file_data, changes
+
+
+def apply_static_class_prop_changes(data, all_changes, filepath):
+    nesting = 0
+    new_file_data = ""
+    changes = []
+    prop_changes = None
+
+    while len(data) > 0:
+        for class_change in all_changes.keys():
+            if data[:len(class_change) + 6] == "class " + class_change:
+                prop_changes = {}
+
+        if prop_changes != None:
+            if data[0] == "{":
+                nesting += 1
+
+            if data[0] == "}":
+                nesting -= 1
+
+                if nesting == 0:
+                    prop_changes = None
+
+            for change_prop in prop_changes.keys():
+                if data[:len(change_prop)] == change_prop:
+                    new_file_data += prop_changes[change_prop]
+                    data = data[len(change_prop):]
+                    changes.append(
+                        f"{filepath} Changed: class/static property {change_prop} (doesn't need return suffix)")
+                    break
+
+            else:
+                new_file_data += data[:1]
+                data = data[1:]
+
+    return new_file_data, changes
