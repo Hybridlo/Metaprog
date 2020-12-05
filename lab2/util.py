@@ -242,3 +242,31 @@ def apply_static_class_prop_changes(data, all_changes, filepath):
                 data = data[1:]
 
     return new_file_data, changes
+
+
+def read_until_newline(data):
+    res = ""
+
+    if data[0] != "\n":
+        res += data[:1]
+        data = data[1:]
+
+    else:
+        return res
+
+
+def remove_star_in_line(line):
+    for i in range(0, len(line)):
+        if line[i] == " ":
+            continue
+
+        elif line[i:i+2] == "*/":
+            return None
+
+        elif line[i] == "*":
+            return line[i+1:]
+
+        else:
+            return line
+
+    return ""
