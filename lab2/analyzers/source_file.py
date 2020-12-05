@@ -1,4 +1,5 @@
 from util import *
+import re
 
 
 def check_filename(verif_file, fix_file, filepath, file_data, filename):
@@ -65,3 +66,12 @@ def check_filename(verif_file, fix_file, filepath, file_data, filename):
             if not filename.startswith(types[0] + "+"):
                 verif_file.write(
                     f"{filepath} Error: file name with one type multiple extentions must match TypeName+Stuff")
+
+
+def check_whitespace(verif_file, fix_file, filepath, file_data, filename):
+    """Checks source file for not allowed spaces"""
+
+    for i in range(0, len(file_data)):
+        if re.match(r"\s", file_data[i]) and file_data[i] != " " and file_data[i] != "\n" and file_data[i:i+2] != "\r\n":
+            verif_file.write(
+                f"{filepath} Error: source file contains illegal whitespace characters")
