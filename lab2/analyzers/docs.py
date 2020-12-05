@@ -43,7 +43,9 @@ def comment_tags(verif_file, fix_file, filepath, file_data):
 
     while i < len(file_data):
         if file_data[i:i+3] == "///":
-            comment_lines, flags, count, i = process_doc_block(file_data[i:])
+            comment_lines, flags, count, offset = process_doc_block(
+                file_data[i:])
+            i += offset
 
             if not check_tags_order(flags):
                 file_write(verif_file,
@@ -53,7 +55,6 @@ def comment_tags(verif_file, fix_file, filepath, file_data):
                 comment_lines, count, filepath)
 
             new_block = "\n".join(new_block_lines)
-            i += len(new_block)
             new_file_data += new_block
 
         new_file_data += file_data[i]

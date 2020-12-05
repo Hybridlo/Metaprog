@@ -7,8 +7,12 @@ global_changes = {}
 def check_initializers(verif_file, fix_file, filepath, file_data):
     i = 0
 
-    while i < len(file_data):
-        word, i = read_next_word_and_end(file_data[i:])
+    while i < len(file_data) - 1:
+        word = read_next_word(file_data[i:])
+        if word == None:
+            return None
+
+        i += len(word)
 
         if word == "init":
             symbols_in_parentheses, i = get_symbols_in_parentheses(file_data)

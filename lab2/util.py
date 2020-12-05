@@ -1,6 +1,6 @@
 def file_write(file, data):
     if file != None:
-        file.write(data)
+        file.write(data + "\n")
 
 
 SEPARATORS = [" ", "\n", "\r", "{", "}", "=", ">",
@@ -49,21 +49,17 @@ def get_next_word_indices(data):
         if start != None and data[i] in SEPARATORS:
             return start, i
 
-    return None  # file read until EOF
+    return (None, None)  # file read until EOF
 
 
 def read_next_word(data):
     """Read the word, disregard indices"""
     start, end = get_next_word_indices(data)
 
+    if start == None:
+        return None
+
     return data[start:end]
-
-
-def read_next_word_and_end(data):
-    """Read the word, give end index"""
-    start, end = get_next_word_indices(data)
-
-    return data[start:end], end
 
 
 def check_word_with_space(data, word):
@@ -90,11 +86,14 @@ def get_symbols_in_parentheses(data):
     res = {}
 
     while get_next_separator_without_spaces(data[i:]) != ")":
-        word1, i = read_next_word_and_end(data[i:])
+        word1 = read_next_word(data[i:])
+        i += len(word1)
+
         word2 = None
 
         if get_next_separator_without_spaces(data[i]) == None:
-            word2, i = read_next_word_and_end(data[i:])
+            word2 = read_next_word(data[i:])
+            i += len(word2)
 
         # res[outerName] = innerName
         if word2 != None:
@@ -103,7 +102,8 @@ def get_symbols_in_parentheses(data):
             res[word1] = word1
 
         # disregard parameter type
-        _, i = read_next_word_and_end(data[i:])
+        tmp = read_next_word(data[i:])
+        i += len(tmp)
 
     return res, i
 
@@ -140,10 +140,12 @@ def get_vars_directly_assigned(data, symbols):
                 break
 
         if newline == True:
-            word1, i = read_next_word_and_end(data[i:])
+            word1 = read_next_word(data[i:])
+            i += len(word1)
 
             if get_next_separator_without_spaces(data[i:]) == "=":
-                word2, i = read_next_word_and_end(data[i:])
+                word2 = read_next_word(data[i:])
+                i += len(word2)
 
                 if is_next_newline(data[i:]) and word2 in symbols.values() and not word1.startswith("self."):
                     res[word1] = word2  # word1 = word2
@@ -159,7 +161,8 @@ def apply_init_changes(file_data, symbols_in_parentheses, vars_directly_assigned
     changes = []
 
     while i < len(file_data):
-        word, i = read_next_word_and_end(file_data[i:])
+        word = read_next_word(file_data[i:])
+        i += len(word)
 
         if word == "init":
             start = i
@@ -178,10 +181,11 @@ def apply_init_changes(file_data, symbols_in_parentheses, vars_directly_assigned
             new_file_data += unprocessed[:start_change]
             unprocessed = unprocessed[start_change:]
 
-            word1, i = read_next_word_and_end(unprocessed)
-            word2, i = read_next_word_and_end(i)
+            word1 = read_next_word(unprocessed)
+            unprocessed = unprocessed[len(word1):]
 
-            unprocessed = unprocessed[i:]
+            word2 = read_next_word(unprocessed)
+            unprocessed = unprocessed[len(word2):]
 
             for k, v in vars_directly_assigned.items():
                 if symbols_in_parentheses[key] == v:
@@ -198,8 +202,11 @@ def apply_init_changes(file_data, symbols_in_parentheses, vars_directly_assigned
         new_file_data += unprocessed[:start_change]
         unprocessed = unprocessed[start_change:]
 
-        word1, i = read_next_word_and_end(unprocessed)
-        word2, i = read_next_word_and_end(i)
+        word1 = read_next_word(unprocessed)
+        unprocessed = unprocessed[len(word1):]
+
+        word2 = read_next_word(unprocessed)
+        unprocessed = unprocessed[len(word2):]
 
         unprocessed = unprocessed[i:]
 
@@ -242,22 +249,24 @@ def apply_static_class_prop_changes(data, all_changes, filepath):
                         f"{filepath} Changed: class/static property {change_prop} (doesn't need return suffix)")
                     break
 
-            else:
-                new_file_data += data[:1]
-                data = data[1:]
+        new_file_data += data[:1]
+        data = data[1:]
 
     return new_file_data, changes
 
 
 def read_until_newline(data):
     res = ""
-
-    if data[0] != "\n":
-        res += data[:1]
+    if data[0] == "\n":
         data = data[1:]
 
-    else:
-        return res
+    while len(data) > 0:
+        if data[0] != "\n":
+            res += data[:1]
+            data = data[1:]
+
+        else:
+            return res
 
 
 def remove_star_in_line(line):
@@ -289,18 +298,12 @@ def process_doc_block(data):
 
     while i < len(data):
         line = read_until_newline(data[i:])
-        if line.lstrip().startwith("///"):
-            return comment_lines, flags, count, i
+
+        if not line.lstrip().startswith("///"):
+            return comment_lines, flags, count, i-1
 
         comment_lines.append(line)
-
-        try:
-            line.index("- Parameter")
-            flags["Parameter"] = flag
-            count["Parameter"] += 1
-            flag += 1
-        except ValueError:
-            pass
+        i += len(line) + 1  # +1 accounts for skipped \n
 
         try:
             line.index("- Parameters")
@@ -308,7 +311,14 @@ def process_doc_block(data):
             count["Parameters"] += 1
             flag += 1
         except ValueError:
-            pass
+
+            try:
+                line.index("- Parameter")
+                flags["Parameter"] = flag
+                count["Parameter"] += 1
+                flag += 1
+            except ValueError:
+                pass
 
         try:
             line.index("- Returns")
@@ -350,14 +360,14 @@ def redo_comment_block(comment_lines, count, filename):
     changes = []
 
     for line in comment_lines:
-        if not line[3:].rstrip().startswith("- "):
+        if not line[3:].lstrip().startswith("- "):
             new_comment_lines.append(line)
             last_non_tag += 1
             continue
 
         break
 
-    tags_start = last_non_tag + 1
+    tags_start = last_non_tag
 
     if count["Parameter"] == 1:
         for i in range(tags_start, len(comment_lines)):
@@ -366,8 +376,8 @@ def redo_comment_block(comment_lines, count, filename):
                 new_comment_lines.append(comment_lines[i])
 
                 # check next ones continuing current
-                for j in range(i, len(comment_lines)):
-                    if not comment_lines[j].startswith("/// - "):
+                for j in range(i+1, len(comment_lines)):
+                    if not comment_lines[j].startswith("/// - ") and not comment_lines[j].startswith("///   - "):
                         new_comment_lines.append(comment_lines[j])
 
                     else:
@@ -393,7 +403,7 @@ def redo_comment_block(comment_lines, count, filename):
                     "///   -" + comment_lines[i][param_index + 11:])
 
                 # check next ones continuing current
-                for j in range(i, len(comment_lines)):
+                for j in range(i+1, len(comment_lines)):
                     if not comment_lines[j].startswith("/// - ") and not comment_lines[j].startswith("///   - "):
                         new_comment_lines.append(comment_lines[j])
 
@@ -415,11 +425,11 @@ def redo_comment_block(comment_lines, count, filename):
                 try:
                     param_index = comment_lines[i].index("///   - ")
                     new_comment_lines.append(
-                        "/// - Parameter " + comment_lines[i][param_index + 8])
+                        "/// - Parameter " + comment_lines[i][param_index + 8:])
 
                     # check next ones continuing current
-                    for j in range(i, len(comment_lines)):
-                        if not comment_lines[j].startswith("/// - "):
+                    for j in range(i+1, len(comment_lines)):
+                        if not comment_lines[j].startswith("/// - ") and not comment_lines[j].startswith("///   - "):
                             new_comment_lines.append(comment_lines[j])
 
                         else:
@@ -438,7 +448,7 @@ def redo_comment_block(comment_lines, count, filename):
                     new_comment_lines.append(comment_lines[i])
 
                     # check next ones continuing current
-                    for j in range(i, len(comment_lines)):
+                    for j in range(i+1, len(comment_lines)):
                         if not comment_lines[j].startswith("/// - ") and not comment_lines[j].startswith("///   - "):
                             new_comment_lines.append(comment_lines[j])
 
@@ -453,6 +463,15 @@ def redo_comment_block(comment_lines, count, filename):
             try:
                 param_index = comment_lines[i].index("- Returns")
                 new_comment_lines.append(comment_lines[i])
+
+                # check next ones continuing current
+                for j in range(i+1, len(comment_lines)):
+                    if not comment_lines[j].startswith("/// - ") and not comment_lines[j].startswith("///   - "):
+                        new_comment_lines.append(comment_lines[j])
+
+                    else:
+                        break
+
                 break
 
             except ValueError:
@@ -463,6 +482,15 @@ def redo_comment_block(comment_lines, count, filename):
             try:
                 param_index = comment_lines[i].index("- Throws")
                 new_comment_lines.append(comment_lines[i])
+
+                # check next ones continuing current
+                for j in range(i+1, len(comment_lines)):
+                    if not comment_lines[j].startswith("/// - ") and not comment_lines[j].startswith("///   - "):
+                        new_comment_lines.append(comment_lines[j])
+
+                    else:
+                        break
+
                 break
 
             except ValueError:

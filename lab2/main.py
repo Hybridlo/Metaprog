@@ -35,26 +35,31 @@ def scan_and_fix_file(filepath, outname):
         verify = None
         fixing = None
 
+        results_folder.mkdir(exist_ok=True)
+
         if args.verify:
             verify = open(results_folder /
-                          (outname + "_verification.log", "w+"))
+                          (outname + "_verification.log"), "w+")
 
         if args.fix:
-            fixing = open(results_folder / (outname + "_fixing.log", "w+"))
+            fixing = open(results_folder / (outname + "_fixing.log"), "w+")
 
         # exit without doing anything if both none
         if verify == None and fixing == None:
             return
 
         for fixer in source_fixers:
+            print("1")
             fixer(verify, fixing, filepath, data, filepath.stem)
 
         for fixer in naming_fixers:
+            print("2")
             changed_data = fixer(verify, fixing, filepath, data)
             if changed_data != None:
                 data = changed_data
 
         for fixer in docs_fixers:
+            print("3")
             changed_data = fixer(verify, fixing, filepath, data)
             if changed_data != None:
                 data = changed_data
