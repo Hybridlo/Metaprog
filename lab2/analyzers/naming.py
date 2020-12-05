@@ -22,7 +22,7 @@ def check_initializers(verif_file, fix_file, filepath, file_data):
                            f"{filepath} Warning: init parameters direct assignment should have same name as field")
 
                 for change in changes:
-                    file_write(verif_file, change)
+                    file_write(fix_file, change)
 
             return new_data
 
@@ -90,7 +90,7 @@ def check_properties(verif_file, fix_file, filepath, file_data):
                    f"{filepath} Warning: static and class properties don't need return type suffix")
 
     for change in changes:
-        file_write(verif_file, change)
+        file_write(fix_file, change)
 
     return new_data
 

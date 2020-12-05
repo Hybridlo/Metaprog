@@ -29,7 +29,7 @@ def javadoc_to_slashes(verif_file, fix_file, filepath, file_data):
     if changed:
         file_write(verif_file,
                    f"{filepath} Warning: Javadoc-style block comments not allowed")
-        file_write(verif_file,
+        file_write(fix_file,
                    f"{filepath} Changed: Javadoc-style block comments transformed into ///")
 
     return new_data
@@ -63,7 +63,7 @@ def comment_tags(verif_file, fix_file, filepath, file_data):
         file_write(verif_file, warning)
 
     for change in changes:
-        file_write(verif_file, change)
+        file_write(fix_file, change)
 
     return new_file_data
 

@@ -1,6 +1,8 @@
 import argparse
 from pathlib import Path
 
+from analyzers import *
+
 # folder to store results
 results_folder = Path("results/")
 
@@ -8,7 +10,7 @@ results_folder = Path("results/")
 extention = "swift"
 
 # create  and configure argparse
-arg_parser = argparse.ArgumentParser(description="PHP formatter")
+arg_parser = argparse.ArgumentParser(description="Swift CCF")
 
 group1 = arg_parser.add_mutually_exclusive_group(required=True)
 group1.add_argument("-d", action="store", dest="directory",
@@ -18,28 +20,47 @@ group1.add_argument("-p", action="store", dest="project",
                     help="project directory to parse (recursive)")
 
 arg_parser.add_argument("-v", "--verify", action="store_true",
-                        dest="verify", help="output errors.log")
+                        dest="verify", help="output unfixable errors and warnings")
 arg_parser.add_argument("-fx", "--fix", action="store_true", dest="fix",
-                        help="create file/directory with formatted code following template in specified file")
+                        help="output fixed errors")
 
 args = arg_parser.parse_args()
 
 
 def scan_and_fix_file(filepath, outname):
+    data = ""
+
     with open(filepath, "r") as infile:
         data = infile.read()
         verify = None
         fixing = None
 
         if args.verify:
-            verify = open(results_folder / (outname + "_verification.log"))
+            verify = open(results_folder /
+                          (outname + "_verification.log", "w+"))
 
         if args.fix:
-            fixing = open(results_folder / (outname + "_fixing.log"))
+            fixing = open(results_folder / (outname + "_fixing.log", "w+"))
 
         # exit without doing anything if both none
         if verify == None and fixing == None:
             return
+
+        for fixer in source_fixers:
+            fixer(verify, fixing, filepath, data, filepath.stem)
+
+        for fixer in naming_fixers:
+            changed_data = fixer(verify, fixing, filepath, data)
+            if changed_data != None:
+                data = changed_data
+
+        for fixer in docs_fixers:
+            changed_data = fixer(verify, fixing, filepath, data)
+            if changed_data != None:
+                data = changed_data
+
+    with open(filepath, "w") as outfile:
+        outfile.write(data)
 
 
 if args.file:
