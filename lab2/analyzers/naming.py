@@ -64,14 +64,15 @@ def check_properties(verif_file, fix_file, filepath, file_data):
             if prop != None:
                 cut = -1
 
-                for j in len(prop):
+                for j in range(1, len(prop)):
                     if not prop_type.endswith(prop[-j:]):
                         break
 
                     if prop[-j] in string.ascii_uppercase:
                         cut = len(prop) - j
 
-                prop_changes[prop] = prop[:cut]
+                if cut != -1:
+                    prop_changes[prop] = prop[:cut]
 
             if file_data[i] == "{":
                 nesting += 1
@@ -101,5 +102,5 @@ def check_properties(verif_file, fix_file, filepath, file_data):
 
 naming_fixers = [
     check_initializers,
-    # check_properties
+    check_properties
 ]

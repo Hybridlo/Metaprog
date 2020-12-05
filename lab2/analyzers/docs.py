@@ -49,8 +49,6 @@ def comment_tags(verif_file, fix_file, filepath, file_data):
                 file_data[i:])
             i += offset
 
-            print(comment_lines)
-
             if not check_tags_order(flags):
                 file_write(verif_file,
                            f"{filepath} Error: tags in doc block are in the wrong order")

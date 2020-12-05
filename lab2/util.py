@@ -229,7 +229,7 @@ def apply_static_class_prop_changes(data, all_changes, filepath):
     while len(data) > 0:
         for class_change in all_changes.keys():
             if data.startswith("class " + class_change):
-                prop_changes = {}
+                prop_changes = all_changes[class_change]
 
         if prop_changes != None:
             if data[0] == "{":
@@ -240,6 +240,7 @@ def apply_static_class_prop_changes(data, all_changes, filepath):
 
                 if nesting == 0:
                     prop_changes = None
+                    continue
 
             for change_prop in prop_changes.keys():
                 if data.startswith(change_prop):
