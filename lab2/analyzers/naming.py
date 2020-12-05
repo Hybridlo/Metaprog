@@ -101,5 +101,5 @@ def check_properties(verif_file, fix_file, filepath, file_data):
 
 naming_fixers = [
     check_initializers,
-    check_properties
+    # check_properties
 ]

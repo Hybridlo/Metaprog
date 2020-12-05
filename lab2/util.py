@@ -277,6 +277,9 @@ def remove_star_in_line(line):
         elif line[i:i+2] == "*/":
             return None
 
+        elif line[i:i+2] == "* ":
+            return line[i+2:]
+
         elif line[i] == "*":
             return line[i+1:]
 

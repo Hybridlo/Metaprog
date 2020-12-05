@@ -11,9 +11,10 @@ def javadoc_to_slashes(verif_file, fix_file, filepath, file_data):
         if file_data[i:i+3] == "/**":
             in_javadoc = True
             changed = True
+            i += 4
 
         if in_javadoc:
-            line = read_until_newline(file_data[i:])
+            line = read_until_newline(file_data[i:]) + "\n"
             i += len(line)
             line = remove_star_in_line(line)
 
@@ -23,8 +24,9 @@ def javadoc_to_slashes(verif_file, fix_file, filepath, file_data):
 
             new_data += "/// " + line
 
-        new_data += file_data[i]
-        i += 1
+        else:
+            new_data += file_data[i]
+            i += 1
 
     if changed:
         file_write(verif_file,
@@ -46,6 +48,8 @@ def comment_tags(verif_file, fix_file, filepath, file_data):
             comment_lines, flags, count, offset = process_doc_block(
                 file_data[i:])
             i += offset
+
+            print(comment_lines)
 
             if not check_tags_order(flags):
                 file_write(verif_file,
