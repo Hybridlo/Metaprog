@@ -353,6 +353,24 @@ def check_tags_order(flags):
     if flags["Parameters"] == 1 and flags["Parameters"] < flags["Returns"] < flags["Throws"] and flags["Parameter"] == 0:
         return True
 
+    if flags["Parameter"] == 1 and flags["Parameter"] < flags["Returns"] and flags["Throws"] == 0 and flags["Parameters"] == 0:
+        return True
+
+    if flags["Parameters"] == 1 and flags["Parameters"] < flags["Returns"] and flags["Throws"] == 0 and flags["Parameter"] == 0:
+        return True
+
+    if flags["Parameter"] == 1 and flags["Parameter"] < flags["Throws"] and flags["Returns"] == 0 and flags["Parameters"] == 0:
+        return True
+
+    if flags["Parameters"] == 1 and flags["Parameters"] < flags["Throws"] and flags["Returns"] == 0 and flags["Parameter"] == 0:
+        return True
+
+    if flags["Parameter"] == 1 and flags["Returns"] == 0 and flags["Throws"] == 0 and flags["Parameters"] == 0:
+        return True
+
+    if flags["Parameters"] == 1 and flags["Returns"] == 0 and flags["Throws"] == 0 and flags["Parameter"] == 0:
+        return True
+
     return False
 
 
