@@ -66,3 +66,9 @@ def comment_tags(verif_file, fix_file, filepath, file_data):
         fix_file.write(change)
 
     return new_file_data
+
+
+docs_fixers = [
+    javadoc_to_slashes,
+    comment_tags
+]

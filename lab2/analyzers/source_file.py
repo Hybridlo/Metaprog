@@ -86,3 +86,9 @@ def various_char_checks(verif_file, fix_file, filepath, file_data, filename):
 
             verif_file.write(
                 f"{filepath} Error: source file contains unicode escaped chars that can be represented as special escaped char")
+
+
+source_fixers = [
+    check_filename,
+    various_char_checks
+]

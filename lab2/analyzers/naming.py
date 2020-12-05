@@ -93,3 +93,9 @@ def check_properties(verif_file, fix_file, filepath, file_data):
         fix_file.write(change)
 
     return new_data
+
+
+naming_fixers = [
+    check_initializers,
+    check_properties
+]
