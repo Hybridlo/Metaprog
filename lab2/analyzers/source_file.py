@@ -68,10 +68,21 @@ def check_filename(verif_file, fix_file, filepath, file_data, filename):
                     f"{filepath} Error: file name with one type multiple extentions must match TypeName+Stuff")
 
 
-def check_whitespace(verif_file, fix_file, filepath, file_data, filename):
-    """Checks source file for not allowed spaces"""
+def various_char_checks(verif_file, fix_file, filepath, file_data, filename):
+    """Checks source file for not allowed spaces
+
+    Checks for unicode escaped characters that
+    can be written as special escape sequence"""
 
     for i in range(0, len(file_data)):
-        if re.match(r"\s", file_data[i]) and file_data[i] != " " and file_data[i] != "\n" and file_data[i:i+2] != "\r\n":
+        if (re.match(r"\s", file_data[i]) and file_data[i] != " "
+                and file_data[i] != "\n" and file_data[i:i+2] != "\r\n"):
+
             verif_file.write(
                 f"{filepath} Error: source file contains illegal whitespace characters")
+
+        if (file_data[i:i+5] in [r"\u{0}", r"\u{9}", r"\u{A}", r"\u{D}"]
+                or file_data[i:i+6] in [r"\u{22}", r"\u{27}", r"\u{5C}"]):
+
+            verif_file.write(
+                f"{filepath} Error: source file contains unicode escaped chars that can be represented as special escaped char")
