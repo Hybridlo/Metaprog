@@ -18,11 +18,11 @@ def check_initializers(verif_file, fix_file, filepath, file_data):
                 file_data, symbols_in_parentheses, vars_directly_assigned, filepath)
 
             if len(changes) > 0:
-                verif_file.write(
-                    f"{filepath} Warning: init parameters direct assignment should have same name as field")
+                file_write(verif_file,
+                           f"{filepath} Warning: init parameters direct assignment should have same name as field")
 
                 for change in changes:
-                    fix_file.write(change)
+                    file_write(verif_file, change)
 
             return new_data
 
@@ -86,11 +86,11 @@ def check_properties(verif_file, fix_file, filepath, file_data):
         file_data, all_changes, filepath)
 
     if len(changes) > 0:
-        verif_file.write(
-            f"{filepath} Warning: static and class properties don't need return type suffix")
+        file_write(verif_file,
+                   f"{filepath} Warning: static and class properties don't need return type suffix")
 
     for change in changes:
-        fix_file.write(change)
+        file_write(verif_file, change)
 
     return new_data
 

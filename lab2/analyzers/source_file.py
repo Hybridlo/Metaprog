@@ -54,18 +54,18 @@ def check_filename(verif_file, fix_file, filepath, file_data, filename):
     if len(types) == 1:
         if len(extentions) == 0:
             if filename != types[0]:
-                verif_file.write(
-                    f"{filepath} Error: file name with one type must match type it's declaring")
+                file_write(verif_file,
+                           f"{filepath} Error: file name with one type must match type it's declaring")
 
         elif len(extentions) == 1:
             if filename != types[0] + "+" + extentions[0]:
-                verif_file.write(
-                    f"{filepath} Error: file name with one type single extention must match TypeName+Protocol")
+                file_write(verif_file,
+                           f"{filepath} Error: file name with one type single extention must match TypeName+Protocol")
 
         else:
             if not filename.startswith(types[0] + "+"):
-                verif_file.write(
-                    f"{filepath} Error: file name with one type multiple extentions must match TypeName+Stuff")
+                file_write(verif_file,
+                           f"{filepath} Error: file name with one type multiple extentions must match TypeName+Stuff")
 
 
 def various_char_checks(verif_file, fix_file, filepath, file_data, filename):
@@ -78,14 +78,14 @@ def various_char_checks(verif_file, fix_file, filepath, file_data, filename):
         if (re.match(r"\s", file_data[i]) and file_data[i] != " "
                 and file_data[i] != "\n" and file_data[i:i+2] != "\r\n"):
 
-            verif_file.write(
-                f"{filepath} Error: source file contains illegal whitespace characters")
+            file_write(verif_file,
+                       f"{filepath} Error: source file contains illegal whitespace characters")
 
         if (file_data[i:i+5] in [r"\u{0}", r"\u{9}", r"\u{A}", r"\u{D}"]
                 or file_data[i:i+6] in [r"\u{22}", r"\u{27}", r"\u{5C}"]):
 
-            verif_file.write(
-                f"{filepath} Error: source file contains unicode escaped chars that can be represented as special escaped char")
+            file_write(verif_file,
+                       f"{filepath} Error: source file contains unicode escaped chars that can be represented as special escaped char")
 
 
 source_fixers = [

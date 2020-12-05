@@ -1,3 +1,8 @@
+def file_write(file, data):
+    if file != None:
+        file.write(data)
+
+
 SEPARATORS = [" ", "\n", "\r", "{", "}", "=", ">",
               "<", ":", "?", ",", "\"", "\'", "(", ")"]
 

@@ -27,10 +27,10 @@ def javadoc_to_slashes(verif_file, fix_file, filepath, file_data):
         i += 1
 
     if changed:
-        verif_file.write(
-            f"{filepath} Warning: Javadoc-style block comments not allowed")
-        fix_file.write(
-            f"{filepath} Changed: Javadoc-style block comments transformed into ///")
+        file_write(verif_file,
+                   f"{filepath} Warning: Javadoc-style block comments not allowed")
+        file_write(verif_file,
+                   f"{filepath} Changed: Javadoc-style block comments transformed into ///")
 
     return new_data
 
@@ -46,8 +46,8 @@ def comment_tags(verif_file, fix_file, filepath, file_data):
             comment_lines, flags, count, i = process_doc_block(file_data[i:])
 
             if not check_tags_order(flags):
-                verif_file.write(
-                    f"{filepath} Error: tags in doc block are in the wrong order")
+                file_write(verif_file,
+                           f"{filepath} Error: tags in doc block are in the wrong order")
 
             new_block_lines, changes, warnings = redo_comment_block(
                 comment_lines, count, filepath)
@@ -60,10 +60,10 @@ def comment_tags(verif_file, fix_file, filepath, file_data):
         i += 1
 
     for warning in warnings:
-        verif_file.write(warning)
+        file_write(verif_file, warning)
 
     for change in changes:
-        fix_file.write(change)
+        file_write(verif_file, change)
 
     return new_file_data
 
