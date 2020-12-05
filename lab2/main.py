@@ -1,24 +1,29 @@
 import argparse
 from pathlib import Path
 
-#folder to store results
+# folder to store results
 results_folder = Path("results/")
 
-#specify file extention of interest
+# specify file extention of interest
 extention = "swift"
 
-#create  and configure argparse
+# create  and configure argparse
 arg_parser = argparse.ArgumentParser(description="PHP formatter")
 
 group1 = arg_parser.add_mutually_exclusive_group(required=True)
-group1.add_argument("-d", action="store", dest="directory", help="directory to parse")
+group1.add_argument("-d", action="store", dest="directory",
+                    help="directory to parse")
 group1.add_argument("-f", action="store", dest="file", help="file to parse")
-group1.add_argument("-p", action="store", dest="project", help="project directory to parse (recursive)")
+group1.add_argument("-p", action="store", dest="project",
+                    help="project directory to parse (recursive)")
 
-arg_parser.add_argument("-v", "--verify", action="store_true", dest="verify", help="output errors.log")
-arg_parser.add_argument("-fx", "--fix", action="store_true", dest="fix", help="create file/directory with formatted code following template in specified file")
+arg_parser.add_argument("-v", "--verify", action="store_true",
+                        dest="verify", help="output errors.log")
+arg_parser.add_argument("-fx", "--fix", action="store_true", dest="fix",
+                        help="create file/directory with formatted code following template in specified file")
 
 args = arg_parser.parse_args()
+
 
 def scan_and_fix_file(filepath, outname):
     with open(filepath, "r") as infile:
@@ -32,11 +37,9 @@ def scan_and_fix_file(filepath, outname):
         if args.fix:
             fixing = open(results_folder / (outname + "_fixing.log"))
 
-        #exit without doing anything if both none
+        # exit without doing anything if both none
         if verify == None and fixing == None:
             return
-
-        
 
 
 if args.file:
