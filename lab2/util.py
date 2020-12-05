@@ -69,7 +69,7 @@ def check_word_with_space(data, word):
     if len(data) < word_len + 1:
         return False
 
-    if data[:word_len+1] == word + " ":
+    if data.startswith(word + " "):
         return True
 
     return False
@@ -216,7 +216,7 @@ def apply_static_class_prop_changes(data, all_changes, filepath):
 
     while len(data) > 0:
         for class_change in all_changes.keys():
-            if data[:len(class_change) + 6] == "class " + class_change:
+            if data.startswith("class " + class_change):
                 prop_changes = {}
 
         if prop_changes != None:
@@ -230,7 +230,7 @@ def apply_static_class_prop_changes(data, all_changes, filepath):
                     prop_changes = None
 
             for change_prop in prop_changes.keys():
-                if data[:len(change_prop)] == change_prop:
+                if data.startswith(change_prop):
                     new_file_data += prop_changes[change_prop]
                     data = data[len(change_prop):]
                     changes.append(
@@ -270,3 +270,197 @@ def remove_star_in_line(line):
             return line
 
     return ""
+
+
+def process_doc_block(data):
+    i = 0
+    comment_lines = []
+    flag = 1
+    flags = {"Parameter": 0, "Parameters": 0,
+             "Returns": 0, "Throws": 0}
+
+    count = {"Parameter": 0, "Parameters": 0,
+             "Returns": 0, "Throws": 0, "Params amount": 0}
+
+    while i < len(data):
+        line = read_until_newline(data[i:])
+        if line.lstrip().startwith("///"):
+            return comment_lines, flags, count, i
+
+        comment_lines.append(line)
+
+        try:
+            line.index("- Parameter")
+            flags["Parameter"] = flag
+            count["Parameter"] += 1
+            flag += 1
+        except ValueError:
+            pass
+
+        try:
+            line.index("- Parameters")
+            flags["Parameters"] = flag
+            count["Parameters"] += 1
+            flag += 1
+        except ValueError:
+            pass
+
+        try:
+            line.index("- Returns")
+            flags["Returns"] = flag
+            count["Returns"] += 1
+            flag += 1
+        except ValueError:
+            pass
+
+        try:
+            line.index("- Throws")
+            flags["Throws"] = flag
+            count["Throws"] += 1
+            flag += 1
+        except ValueError:
+            pass
+
+        try:
+            line.index("///   - ")
+            count["Params amount"] += 1
+        except ValueError:
+            pass
+
+
+def check_tags_order(flags):
+    if flags["Parameter"] == 1 and flags["Parameter"] < flags["Returns"] < flags["Throws"] and flags["Parameters"] == 0:
+        return True
+
+    if flags["Parameters"] == 1 and flags["Parameters"] < flags["Returns"] < flags["Throws"] and flags["Parameter"] == 0:
+        return True
+
+    return False
+
+
+def redo_comment_block(comment_lines, count, filename):
+    new_comment_lines = []
+    last_non_tag = 0
+    warnings = []
+    changes = []
+
+    for line in comment_lines:
+        if not line[3:].rstrip().startswith("- "):
+            new_comment_lines.append(line)
+            last_non_tag += 1
+            continue
+
+        break
+
+    tags_start = last_non_tag + 1
+
+    if count["Parameter"] == 1:
+        for i in range(tags_start, len(comment_lines)):
+            try:
+                comment_lines[i].index("- Parameter")
+                new_comment_lines.append(comment_lines[i])
+
+                # check next ones continuing current
+                for j in range(i, len(comment_lines)):
+                    if not comment_lines[j].startswith("/// - "):
+                        new_comment_lines.append(comment_lines[j])
+
+                    else:
+                        break
+
+                break
+            except ValueError:
+                pass
+
+    elif count["Parameter"] > 1:
+        warnings.append(
+            f"{filename} Error: When there are more than 2 parameters use \"Parameters\" instead of \"Parameter\"")
+
+        changes.append(
+            f"{filename} Changed: multiple \"Parameter\" changed to \"Parameters\"")
+
+        new_comment_lines.append("/// - Parameters:")
+
+        for i in range(tags_start, len(comment_lines)):
+            try:
+                param_index = comment_lines[i].index("- Parameter")
+                new_comment_lines.append(
+                    "///   -" + comment_lines[i][param_index + 11:])
+
+                # check next ones continuing current
+                for j in range(i, len(comment_lines)):
+                    if not comment_lines[j].startswith("/// - ") and not comment_lines[j].startswith("///   - "):
+                        new_comment_lines.append(comment_lines[j])
+
+                    else:
+                        break
+
+            except ValueError:
+                pass
+
+    if count["Parameters"] == 1:
+        if count["Params amount"] == 1:
+            warnings.append(
+                f"{filename} Error: When there is 1 parameter use \"Parameter\" instead of \"Parameters\"")
+
+            changes.append(
+                f"{filename} Changed: single parameter in \"Parameters\" changed to \"Parameter\"")
+
+            for i in range(tags_start, len(comment_lines)):
+                try:
+                    param_index = comment_lines[i].index("///   - ")
+                    new_comment_lines.append(
+                        "/// - Parameter " + comment_lines[i][param_index + 8])
+
+                    # check next ones continuing current
+                    for j in range(i, len(comment_lines)):
+                        if not comment_lines[j].startswith("/// - "):
+                            new_comment_lines.append(comment_lines[j])
+
+                        else:
+                            break
+
+                    break
+                except ValueError:
+                    pass
+
+        else:
+            new_comment_lines.append("/// - Parameters:")
+
+            for i in range(tags_start, len(comment_lines)):
+                try:
+                    param_index = comment_lines[i].index("///   - ")
+                    new_comment_lines.append(comment_lines[i])
+
+                    # check next ones continuing current
+                    for j in range(i, len(comment_lines)):
+                        if not comment_lines[j].startswith("/// - ") and not comment_lines[j].startswith("///   - "):
+                            new_comment_lines.append(comment_lines[j])
+
+                        else:
+                            break
+
+                except ValueError:
+                    pass
+
+    if count["Returns"] == 1:
+        for i in range(tags_start, len(comment_lines)):
+            try:
+                param_index = comment_lines[i].index("- Returns")
+                new_comment_lines.append(comment_lines[i])
+                break
+
+            except ValueError:
+                pass
+
+    if count["Throws"] == 1:
+        for i in range(tags_start, len(comment_lines)):
+            try:
+                param_index = comment_lines[i].index("- Throws")
+                new_comment_lines.append(comment_lines[i])
+                break
+
+            except ValueError:
+                pass
+
+    return new_comment_lines, changes, warnings
