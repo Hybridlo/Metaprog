@@ -87,42 +87,43 @@ def final_fix(filepath):
             outfile.write(data)
 
 
-if args.file:
-    file = Path(args.file)
+def main():
+    if args.file:
+        file = Path(args.file)
 
-    outname = file.stem
+        outname = file.stem
 
-    if not file.exists():
-        raise FileNotFoundError("File not found")
+        if not file.exists():
+            raise FileNotFoundError("File not found")
 
-    scan_and_fix_file(file, outname)
+        scan_and_fix_file(file, outname)
 
-    final_fix(file)
+        final_fix(file)
 
-if args.directory:
-    directory = Path(args.directory)
+    if args.directory:
+        directory = Path(args.directory)
 
-    outname = directory.stem
+        outname = directory.stem
 
-    if not directory.exists():
-        raise FileNotFoundError("Directory not found")
+        if not directory.exists():
+            raise FileNotFoundError("Directory not found")
 
-    for filepath in directory.glob("*." + extention):
-        scan_and_fix_file(filepath, outname)
+        for filepath in directory.glob("*." + extention):
+            scan_and_fix_file(filepath, outname)
 
-    for filepath in directory.glob("*." + extention):
-        final_fix(filepath)
+        for filepath in directory.glob("*." + extention):
+            final_fix(filepath)
 
-if args.project:
-    project = Path(args.project)
+    if args.project:
+        project = Path(args.project)
 
-    outname = project.stem
+        outname = project.stem
 
-    if not project.exists():
-        raise FileNotFoundError("Project directory not found")
+        if not project.exists():
+            raise FileNotFoundError("Project directory not found")
 
-    for filepath in project.glob("**/*." + extention):
-        scan_and_fix_file(filepath, outname)
+        for filepath in project.glob("**/*." + extention):
+            scan_and_fix_file(filepath, outname)
 
-    for filepath in project.glob("**/*." + extention):
-        final_fix(filepath)
+        for filepath in project.glob("**/*." + extention):
+            final_fix(filepath)
