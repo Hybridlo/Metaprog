@@ -1,4 +1,4 @@
-from util import *
+from util.util import *
 
 
 def javadoc_to_slashes(verif_file, fix_file, filepath, file_data):
