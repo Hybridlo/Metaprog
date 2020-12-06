@@ -12,10 +12,13 @@ def check_initializers(verif_file, fix_file, filepath, file_data):
         if word == None:
             return None
 
-        i += len(word)
+        i += len(word) + file_data[i:].index(word)
 
         if word == "init":
-            symbols_in_parentheses, i = get_symbols_in_parentheses(file_data)
+            symbols_in_parentheses, offset = get_symbols_in_parentheses(
+                file_data[i:])
+            i += offset
+
             vars_directly_assigned = get_vars_directly_assigned(
                 file_data, symbols_in_parentheses)
             new_data, changes = apply_init_changes(

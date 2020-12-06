@@ -33,6 +33,9 @@ def get_next_separator_without_spaces(data):
 
     index = next_separator_without_spaces_index(data)
 
+    if index == None:
+        return None
+
     return data[index]
 
 
@@ -79,21 +82,18 @@ def check_word_with_space(data, word):
 def get_symbols_in_parentheses(data):
     """Get parameter names in parentheses"""
 
-    if get_next_separator_without_spaces(data) != "(":
-        return None
-
     i = 0
     res = {}
 
     while get_next_separator_without_spaces(data[i:]) != ")":
         word1 = read_next_word(data[i:])
-        i += len(word1)
+        i += len(word1) + data[i:].index(word1)
 
         word2 = None
 
         if get_next_separator_without_spaces(data[i]) == None:
             word2 = read_next_word(data[i:])
-            i += len(word2)
+            i += len(word2) + data[i:].index(word2)
 
         # res[outerName] = innerName
         if word2 != None:
@@ -103,7 +103,7 @@ def get_symbols_in_parentheses(data):
 
         # disregard parameter type
         tmp = read_next_word(data[i:])
-        i += len(tmp)
+        i += len(tmp) + data[i:].index(tmp)
 
     return res, i
 
@@ -128,6 +128,7 @@ def get_vars_directly_assigned(data, symbols):
     while i < len(data):
         if data[i] == "\n":
             newline = True
+            i += 1
             continue
 
         if data[i] == "{":
@@ -141,16 +142,23 @@ def get_vars_directly_assigned(data, symbols):
 
         if newline == True:
             word1 = read_next_word(data[i:])
-            i += len(word1)
+
+            if word1 == None:
+                break
+
+            i += len(word1) + data[i:].index(word1)
 
             if get_next_separator_without_spaces(data[i:]) == "=":
                 word2 = read_next_word(data[i:])
-                i += len(word2)
+                i += len(word2) + data[i:].index(word2)
 
                 if is_next_newline(data[i:]) and word2 in symbols.values() and not word1.startswith("self."):
                     res[word1] = word2  # word1 = word2
 
-        i += 1
+            newline = False
+
+        else:
+            i += 1
 
     return res
 
@@ -162,7 +170,11 @@ def apply_init_changes(file_data, symbols_in_parentheses, vars_directly_assigned
 
     while i < len(file_data):
         word = read_next_word(file_data[i:])
-        i += len(word)
+
+        if word == None:
+            break
+
+        i += len(word) + file_data[i:].index(word)
 
         if word == "init":
             start = i
@@ -182,10 +194,12 @@ def apply_init_changes(file_data, symbols_in_parentheses, vars_directly_assigned
             unprocessed = unprocessed[start_change:]
 
             word1 = read_next_word(unprocessed)
-            unprocessed = unprocessed[len(word1):]
+            offset = len(word1) + unprocessed.index(word1)
+            unprocessed = unprocessed[offset:]
 
             word2 = read_next_word(unprocessed)
-            unprocessed = unprocessed[len(word2):]
+            offset = len(word2) + unprocessed.index(word2)
+            unprocessed = unprocessed[offset:]
 
             for k, v in vars_directly_assigned.items():
                 if symbols_in_parentheses[key] == v:
@@ -203,12 +217,12 @@ def apply_init_changes(file_data, symbols_in_parentheses, vars_directly_assigned
         unprocessed = unprocessed[start_change:]
 
         word1 = read_next_word(unprocessed)
-        unprocessed = unprocessed[len(word1):]
+        offset = len(word1) + unprocessed.index(word1)
+        unprocessed = unprocessed[offset:]
 
         word2 = read_next_word(unprocessed)
-        unprocessed = unprocessed[len(word2):]
-
-        unprocessed = unprocessed[i:]
+        offset = len(word2) + unprocessed.index(word2)
+        unprocessed = unprocessed[offset:]
 
         new_file_data += f"self.{key} = {key}"
 

@@ -49,17 +49,14 @@ def scan_and_fix_file(filepath, outname):
             return
 
         for fixer in source_fixers:
-            print("1")
             fixer(verify, fixing, filepath, data, filepath.stem)
 
         for fixer in naming_fixers:
-            print("2")
             changed_data = fixer(verify, fixing, filepath, data)
             if changed_data != None:
                 data = changed_data
 
         for fixer in docs_fixers:
-            print("3")
             changed_data = fixer(verify, fixing, filepath, data)
             if changed_data != None:
                 data = changed_data
