@@ -28,6 +28,7 @@ args = arg_parser.parse_args()
 
 
 def scan_and_fix_file(filepath, outname):
+    """Apply usual fixers"""
     data = ""
 
     with open(filepath, "r") as infile:
@@ -72,6 +73,7 @@ def scan_and_fix_file(filepath, outname):
 
 
 def final_fix(filepath):
+    """Apply global changes"""
     data = ""
 
     with open(filepath, "r") as infile:

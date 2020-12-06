@@ -2,6 +2,7 @@ from util import *
 
 
 def javadoc_to_slashes(verif_file, fix_file, filepath, file_data):
+    """Transforms javadoc-style comment to three slash block"""
     i = 0
     in_javadoc = False
     new_data = ""
@@ -38,6 +39,8 @@ def javadoc_to_slashes(verif_file, fix_file, filepath, file_data):
 
 
 def comment_tags(verif_file, fix_file, filepath, file_data):
+    """Check and modify comment tags, so
+    that they follow code convetions"""
     i = 0
     new_file_data = ""
     warnings = []

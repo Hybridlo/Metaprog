@@ -5,6 +5,8 @@ global_changes = {}
 
 
 def apply_global(file_data):
+    """Applies changes implemented in
+    static and class property globally"""
     i = 0
     # watch_list[type] = relative nesting scope
     watch_list = {}
@@ -68,6 +70,8 @@ def apply_global(file_data):
 
 
 def check_initializers(verif_file, fix_file, filepath, file_data):
+    """Changes expressions of type "a=b"
+    to "self.a = a" in init"""
     i = 0
 
     while i < len(file_data) - 1:
@@ -98,6 +102,7 @@ def check_initializers(verif_file, fix_file, filepath, file_data):
 
 
 def check_properties(verif_file, fix_file, filepath, file_data):
+    """Removes return suffix from class and static properties"""
     global global_changes
 
     i = 0

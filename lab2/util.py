@@ -109,6 +109,7 @@ def get_symbols_in_parentheses(data):
 
 
 def is_next_newline(data):
+    """While skipping spaces, checks for \n as next char"""
     for i in range(len(data)):
         if data[i] == "\n":
             return True
@@ -120,6 +121,8 @@ def is_next_newline(data):
 
 
 def get_vars_directly_assigned(data, symbols):
+    """Looking for expression "a = b" in init"""
+
     res = {}
     newline = False
     i = 0
@@ -164,6 +167,7 @@ def get_vars_directly_assigned(data, symbols):
 
 
 def apply_init_changes(file_data, symbols_in_parentheses, vars_directly_assigned, filepath):
+    """Change "a = b" in init to "self.a = a" """
     i = 0
     start = None
     changes = []
@@ -235,6 +239,7 @@ def apply_init_changes(file_data, symbols_in_parentheses, vars_directly_assigned
 
 
 def apply_static_class_prop_changes(data, all_changes, filepath):
+    """Apply removing suffix from static and class properties"""
     nesting = 0
     new_file_data = ""
     changes = []
@@ -271,6 +276,7 @@ def apply_static_class_prop_changes(data, all_changes, filepath):
 
 
 def read_until_newline(data):
+    """Read data until newline is found"""
     res = ""
     if data[0] == "\n":
         data = data[1:]
@@ -285,6 +291,7 @@ def read_until_newline(data):
 
 
 def remove_star_in_line(line):
+    """Return (docstring) line without javadoc style *"""
     for i in range(0, len(line)):
         if line[i] == " ":
             continue
@@ -305,6 +312,7 @@ def remove_star_in_line(line):
 
 
 def process_doc_block(data):
+    """Gather info about current doc block"""
     i = 0
     comment_lines = []
     flag = 1
@@ -362,6 +370,7 @@ def process_doc_block(data):
 
 
 def check_tags_order(flags):
+    """Check if tags go in allowed order"""
     if flags["Parameter"] == 1 and flags["Parameter"] < flags["Returns"] < flags["Throws"] and flags["Parameters"] == 0:
         return True
 
@@ -390,6 +399,7 @@ def check_tags_order(flags):
 
 
 def redo_comment_block(comment_lines, count, filename):
+    """Modify comment block, so that if follows code conventions"""
     new_comment_lines = []
     last_non_tag = 0
     warnings = []
