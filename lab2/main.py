@@ -39,10 +39,10 @@ def scan_and_fix_file(filepath, outname):
 
         if args.verify:
             verify = open(results_folder /
-                          (outname + "_verification.log"), "w+")
+                          (outname + "_verification.log"), "a+")
 
         if args.fix:
-            fixing = open(results_folder / (outname + "_fixing.log"), "w+")
+            fixing = open(results_folder / (outname + "_fixing.log"), "a+")
 
         # exit without doing anything if both none
         if verify == None and fixing == None:
@@ -71,6 +71,18 @@ def scan_and_fix_file(filepath, outname):
         outfile.write(data)
 
 
+def final_fix(filepath):
+    data = ""
+
+    with open(filepath, "r") as infile:
+        data = infile.read()
+
+        data = apply_global(data)
+
+    with open(filepath, "w") as outfile:
+        outfile.write(data)
+
+
 if args.file:
     file = Path(args.file)
 
@@ -80,6 +92,8 @@ if args.file:
         raise FileNotFoundError("File not found")
 
     scan_and_fix_file(file, outname)
+
+    final_fix(file)
 
 if args.directory:
     directory = Path(args.directory)
@@ -92,6 +106,9 @@ if args.directory:
     for filepath in directory.glob("*." + extention):
         scan_and_fix_file(filepath, outname)
 
+    for filepath in directory.glob("*." + extention):
+        final_fix(filepath)
+
 if args.project:
     project = Path(args.project)
 
@@ -102,3 +119,6 @@ if args.project:
 
     for filepath in project.glob("**/*." + extention):
         scan_and_fix_file(filepath, outname)
+
+    for filepath in project.glob("**/*." + extention):
+        final_fix(filepath)

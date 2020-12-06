@@ -4,6 +4,69 @@ import string
 global_changes = {}
 
 
+def apply_global(file_data):
+    i = 0
+    # watch_list[type] = relative nesting scope
+    watch_list = {}
+    new_file_data = ""
+    last_carry_index = 0
+
+    while i < len(file_data) - 1:
+        word = file_data[i:i+3]
+
+        if word in ["var", "let"]:
+            i += 3
+
+            variable = read_next_word(file_data[i:])
+            i += len(variable) + file_data[i:].index(variable)
+
+            var_type = read_next_word(file_data[i:])
+            i += len(var_type) + file_data[i:].index(var_type)
+
+            for key in global_changes.keys():
+                if key == var_type:
+                    watch_list[variable] = {
+                        "nestedness": 0, "parent class": var_type}
+
+        to_pop = []
+
+        for variable in watch_list.keys():
+            if file_data[i] == "{":
+                watch_list[variable]["nestedness"] += 1
+
+            if file_data[i] == "}":
+                watch_list[variable]["nestedness"] -= 1
+
+            if watch_list[variable]["nestedness"] < 0:
+                to_pop.append(variable)
+
+        for p in to_pop:
+            watch_list.pop(p)
+
+        possible_change = read_next_word(file_data[i:])
+
+        if possible_change != None:
+            for variable in watch_list.keys():
+                if possible_change.startswith(variable):
+                    class_change = global_changes[watch_list[variable]
+                                                  ["parent class"]]
+
+                    for change_from in class_change.keys():
+                        if possible_change.startswith(variable + "." + change_from):
+                            i = file_data.index(possible_change, i)
+                            new_file_data += file_data[last_carry_index:i]
+                            new_file_data += variable + "." + \
+                                class_change[change_from]
+                            last_carry_index = i + \
+                                len(variable + "." + change_from)
+
+        i += 1
+
+    new_file_data += file_data[last_carry_index:]
+
+    return new_file_data
+
+
 def check_initializers(verif_file, fix_file, filepath, file_data):
     i = 0
 
@@ -99,6 +162,8 @@ def check_properties(verif_file, fix_file, filepath, file_data):
 
     for change in changes:
         file_write(fix_file, change)
+
+    global_changes.update(all_changes)
 
     return new_data
 

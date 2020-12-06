@@ -54,8 +54,6 @@ def check_filename(verif_file, fix_file, filepath, file_data, filename):
 
         i += 1
 
-    print(types, extensions)
-
     if len(types) == 1:
         if len(extensions) == 0:
             if filename != types[0]:
