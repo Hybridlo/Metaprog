@@ -30,11 +30,11 @@ args = arg_parser.parse_args()
 def scan_and_fix_file(filepath, outname):
     """Apply usual fixers"""
     data = ""
+    verify = None
+    fixing = None
 
     with open(filepath, "r") as infile:
         data = infile.read()
-        verify = None
-        fixing = None
 
         results_folder.mkdir(exist_ok=True)
 
@@ -68,8 +68,9 @@ def scan_and_fix_file(filepath, outname):
         if fixing != None:
             fixing.close()
 
-    with open(filepath, "w") as outfile:
-        outfile.write(data)
+    if fixing != None:
+        with open(filepath, "w") as outfile:
+            outfile.write(data)
 
 
 def final_fix(filepath):
@@ -81,8 +82,9 @@ def final_fix(filepath):
 
         data = apply_global(data)
 
-    with open(filepath, "w") as outfile:
-        outfile.write(data)
+    if args.fix:
+        with open(filepath, "w") as outfile:
+            outfile.write(data)
 
 
 if args.file:
