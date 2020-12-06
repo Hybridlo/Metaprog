@@ -1,1 +1,4 @@
 results/
+build/
+dist/
+Swift_CCF_Kravchuk.egg-info/

@@ -1,12 +1,20 @@
 # Swift CCF
 
-## Instalation
+## Installation
 
 No dependencies
 
+Download from pip:
+
+pip install Swift-CCF-Kravchuk
+
 ## Usage
 
-python [-v] [-fx] -(f|d|p) directory/filename
+python exec/main.py [-v] [-fx] -(f|d|p) directory/filename
+
+OR (if downloaded from pip)
+
+k-swift-ccf [-v] [-fx] -(f|d|p) directory/filename
 
 -f specify path to a php file to be verified and/or formatted
 -d specify path to a directory with php files to be verified and/or formatted
