@@ -61,6 +61,12 @@ def scan_and_fix_file(filepath, outname):
             if changed_data != None:
                 data = changed_data
 
+        if verify != None:
+            verify.close()
+
+        if fixing != None:
+            fixing.close()
+
     with open(filepath, "w") as outfile:
         outfile.write(data)
 

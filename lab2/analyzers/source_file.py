@@ -5,11 +5,12 @@ import re
 def check_filename(verif_file, fix_file, filepath, file_data, filename):
     """Check types in a file, if there's one
     check filename for convention compliance,
-    also check for extentions"""
+    also check for extensions"""
     types = []
-    extentions = []
+    extensions = []
+    i = 0
 
-    for i in range(0, len(file_data)):
+    while i < len(file_data) - 1:
         # check for class keyword
         if check_word_with_space(file_data[i:], "class") and not check_word_with_space(file_data[i:], "class var"):
             types.append(read_next_word(file_data[i+6:]))
@@ -18,54 +19,58 @@ def check_filename(verif_file, fix_file, filepath, file_data, filename):
         if check_word_with_space(file_data[i:], "struct"):
             types.append(read_next_word(file_data[i+6:]))
 
-        # check type extention
-        if check_word_with_space(file_data[i:], "extention"):
+        # check type extension
+        if check_word_with_space(file_data[i:], "extension"):
             # get type being extended
-            offset = len("extention ")
-            start, end = get_next_word_indices(file_data[i+offset:])
-            decl_type = file_data[start:end]
+            offset = len("extension ")
+            i += offset
+            decl_type = read_next_word(file_data[i:])
+            i = len(decl_type) + file_data.index(decl_type, i)
+
             types.append(decl_type)
 
-            # get first extention
-            offset = end
-            start, end = get_next_word_indices(file_data[i+offset:])
-            extention1 = file_data[start:end]
-            extentions.append(extention1)
+            # get first extension
+            extension1 = read_next_word(file_data[i:])
+            i = len(extension1) + file_data.index(extension1, i)
+            extensions.append(extension1)
 
-            # perform check for second extention (by searching for comma)
-            second_extention = False
+            # perform check for second extension (by searching for comma)
+            second_extension = False
 
-            for j in range(end, len(file_data)):
+            for j in range(i, len(file_data)):
                 if file_data[j] == " ":
                     continue
 
                 elif file_data[j] == ",":
-                    second_extention = True
+                    second_extension = True
 
                 break
 
-            # get second extention if it exists, no need to check for more
-            if second_extention:
-                offset = end
-                start, end = get_next_word_indices(file_data[i+offset:])
-                extention2 = file_data[start:end]
-                extentions.append(extention2)
+            # get second extension if it exists, no need to check for more
+            if second_extension:
+                extension2 = read_next_word(file_data[i:])
+                i = len(extension2) + file_data.index(extension2, i)
+                extensions.append(extension2)
+
+        i += 1
+
+    print(types, extensions)
 
     if len(types) == 1:
-        if len(extentions) == 0:
+        if len(extensions) == 0:
             if filename != types[0]:
                 file_write(verif_file,
                            f"{filepath} Error: file name with one type must match type it's declaring")
 
-        elif len(extentions) == 1:
-            if filename != types[0] + "+" + extentions[0]:
+        elif len(extensions) == 1:
+            if filename != types[0] + "+" + extensions[0]:
                 file_write(verif_file,
-                           f"{filepath} Error: file name with one type single extention must match TypeName+Protocol")
+                           f"{filepath} Error: file name with one type single extension must match TypeName+Protocol")
 
         else:
             if not filename.startswith(types[0] + "+"):
                 file_write(verif_file,
-                           f"{filepath} Error: file name with one type multiple extentions must match TypeName+Stuff")
+                           f"{filepath} Error: file name with one type multiple extensions must match TypeName+Stuff")
 
 
 def various_char_checks(verif_file, fix_file, filepath, file_data, filename):
