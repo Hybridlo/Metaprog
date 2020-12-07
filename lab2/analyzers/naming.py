@@ -230,7 +230,7 @@ def check_camel_case(verif_file, fix_file, filepath, file_data):
                         all_changes, {None: class_changes})
 
                 new_data += ucc_class
-                i += len(ucc_class)
+                i += len(inside_class)
 
         if check_word_with_space(file_data[i:], "var") or check_word_with_space(file_data[i:], "let"):
             variable = read_next_word(file_data[i+3:])
@@ -266,7 +266,7 @@ def check_camel_case(verif_file, fix_file, filepath, file_data):
                         class_changes.get(variable))
 
                 new_data += lcc_variable
-                i += len(lcc_variable)
+                i += len(variable)
 
                 class_changes = dict_update(
                     class_changes, {variable: lcc_variable})

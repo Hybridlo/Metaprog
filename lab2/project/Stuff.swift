@@ -24,4 +24,9 @@ func numericValue(of digit: UnicodeScalar, radix: Int = 10) -> Int {
   thing.redColor
 }
 thing.redColor
+
 WrongCase
+
+sNaKe_CASE
+
+second_thing = ANOTHER_WRONG_SNAKE_CASE()

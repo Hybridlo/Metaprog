@@ -12,4 +12,10 @@ public class URLSession {
 
 let WrongCase = 1
 
+var sNaKe_CASE = "wow"
+
+public class ANOTHER_WRONG_SNAKE_CASE {
+  
+}
+
 NumericValue()
