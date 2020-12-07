@@ -60,15 +60,30 @@ def check_filename(verif_file, fix_file, filepath, file_data, filename):
                 file_write(verif_file,
                            f"{filepath} Error: file name with one type must match type it's declaring")
 
+                file_write(
+                    fix_file, f"{filepath} Changed: new file name is \"{types[0]}\"")
+
+                return types[0]
+
         elif len(extensions) == 1:
             if filename != types[0] + "+" + extensions[0]:
                 file_write(verif_file,
                            f"{filepath} Error: file name with one type single extension must match TypeName+Protocol")
 
+                file_write(
+                    fix_file, f"{filepath} Changed: new file name is \"{types[0]} + {extensions[0]}\"")
+
+                return types[0] + "+" + extensions[0]
+
         else:
             if not filename.startswith(types[0] + "+"):
                 file_write(verif_file,
                            f"{filepath} Error: file name with one type multiple extensions must match TypeName+Stuff")
+
+                file_write(
+                    fix_file, f"{filepath} Changed: new file name is \"{types[0]} + Protocols\"")
+
+                return types[0] + "+" + "Protocols"
 
 
 def various_char_checks(verif_file, fix_file, filepath, file_data, filename):

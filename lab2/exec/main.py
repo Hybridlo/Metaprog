@@ -35,6 +35,7 @@ def scan_and_fix_file(filepath, outname):
 
     with open(filepath, "r") as infile:
         data = infile.read()
+        new_filename = None
 
         results_folder.mkdir(exist_ok=True)
 
@@ -50,7 +51,10 @@ def scan_and_fix_file(filepath, outname):
             return
 
         for fixer in source_fixers:
-            fixer(verify, fixing, filepath, data, filepath.stem)
+            possible_new_filename = fixer(
+                verify, fixing, filepath, data, filepath.stem)
+            if possible_new_filename != None:
+                new_filename = possible_new_filename
 
         for fixer in naming_fixers:
             changed_data = fixer(verify, fixing, filepath, data)
@@ -69,6 +73,9 @@ def scan_and_fix_file(filepath, outname):
             fixing.close()
 
     if fixing != None:
+        if new_filename != None:
+            filepath.unlink()
+            filepath = filepath.parent / (new_filename + "." + extention)
         with open(filepath, "w") as outfile:
             outfile.write(data)
 
