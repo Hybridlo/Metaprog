@@ -1,6 +1,25 @@
 import collections.abc
 
 
+def snake_to_camel(word, upper):
+    if word == None:
+        return None
+
+    if word.find("_") == -1:
+        return word
+
+    parts = word.split("_")
+
+    if upper:
+        res = parts[0][0].upper() + parts[0][1:].lower()
+    else:
+        res = parts[0].lower()
+    for i in range(1, len(parts)):
+        res += parts[i][0].upper() + parts[i][1:].lower()
+
+    return res
+
+
 def dict_update(d, u):
     for k, v in u.items():
         if isinstance(v, collections.abc.Mapping):
@@ -568,8 +587,8 @@ def redo_comment_block(comment_lines, count, filename):
 
 
 def lower_camel_case(symbol):
-    return symbol[0].lower() + symbol[1:]
+    return snake_to_camel(symbol[0].lower() + symbol[1:], False)
 
 
 def upper_camel_case(symbol):
-    return symbol[0].upper() + symbol[1:]
+    return snake_to_camel(symbol[0].upper() + symbol[1:], True)
