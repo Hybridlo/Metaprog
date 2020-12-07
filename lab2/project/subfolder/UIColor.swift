@@ -1,5 +1,5 @@
-public class UIColor {
-  public class var redColor: UIColor {           // AVOID.
+public class uIColor {
+  public class var redColor: uIColor {           // AVOID.
     // ...
   }
 }
@@ -9,3 +9,7 @@ public class URLSession {
     // ...
   }
 }
+
+let WrongCase = 1
+
+NumericValue()

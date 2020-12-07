@@ -1,3 +1,15 @@
+import collections.abc
+
+
+def dict_update(d, u):
+    for k, v in u.items():
+        if isinstance(v, collections.abc.Mapping):
+            d[k] = dict_update(d.get(k, {}), v)
+        else:
+            d[k] = v
+    return d
+
+
 def file_write(file, data):
     if file != None:
         file.write(data + "\n")
@@ -39,25 +51,34 @@ def get_next_separator_without_spaces(data):
     return data[index]
 
 
-def get_next_word_indices(data):
+def get_next_word_indices(data, ignore_sep):
     """Get indices between separators,
     skipping separators at start"""
 
     start = None
 
+    if len(data) == 1:
+        return (None, None)
+
     for i in range(0, len(data)):
+        if start == None and not ignore_sep and data[i] in SEPARATORS:
+            break
+
         if start == None and data[i] not in SEPARATORS:
             start = i
 
         if start != None and data[i] in SEPARATORS:
             return start, i
 
+        if start != None and i == len(data) - 1:
+            return start, i+1
+
     return (None, None)  # file read until EOF
 
 
-def read_next_word(data):
+def read_next_word(data, ignore_sep=True):
     """Read the word, disregard indices"""
-    start, end = get_next_word_indices(data)
+    start, end = get_next_word_indices(data, ignore_sep)
 
     if start == None:
         return None
@@ -543,3 +564,11 @@ def redo_comment_block(comment_lines, count, filename):
                 pass
 
     return new_comment_lines, changes, warnings
+
+
+def lower_camel_case(symbol):
+    return symbol[0].lower() + symbol[1:]
+
+
+def upper_camel_case(symbol):
+    return symbol[0].upper() + symbol[1:]

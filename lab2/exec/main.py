@@ -127,3 +127,7 @@ def main():
 
         for filepath in project.glob("**/*." + extention):
             final_fix(filepath)
+
+
+if __name__ == "__main__":
+    main()

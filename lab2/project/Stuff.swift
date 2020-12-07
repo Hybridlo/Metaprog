@@ -6,7 +6,7 @@
  *   - radix: The radix, between 2 and 36, used to compute the numeric value.
  * - Returns: The numeric value of the scalar.
  */
-func numericValue(of digit: UnicodeScalar, radix: Int = 10) -> Int {
+func NumericValue(of digit: UnicodeScalar, radix: Int = 10) -> Int {
   // ...
 }
 
@@ -20,7 +20,8 @@ Returns the numeric value of the given digit represented as a Unicode scalar.
 */
 func numericValue(of digit: UnicodeScalar, radix: Int = 10) -> Int {
   // ...
-  var thing = UIColor()
+  var thing = uIColor()
   thing.redColor
 }
 thing.redColor
+WrongCase
