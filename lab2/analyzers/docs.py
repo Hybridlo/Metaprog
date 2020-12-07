@@ -74,7 +74,42 @@ def comment_tags(verif_file, fix_file, filepath, file_data):
     return new_file_data
 
 
+def comment_before_public(verif_file, fix_file, filepath, file_data):
+    """Warn about missing documentation"""
+    i = 0
+    prev_is_comment = False
+
+    while i < len(file_data):
+        line = read_until_newline(file_data[i:])
+        i += len(line)
+
+        if line.find("public class ") > -1 and line.find("public class var ") == -1 and not prev_is_comment:
+            index = line.index("public class ") + len("public class ")
+            word = read_next_word(line[index:])
+            file_write(
+                verif_file, f"{filepath} Error: {word} missing documentation")
+
+        if line.find("func ") > -1 and not prev_is_comment:
+            index = line.index("func ") + len("func ")
+            word = read_next_word(line[index:])
+            file_write(
+                verif_file, f"{filepath} Error: {word} missing documentation")
+
+        if line.lstrip()[:3] == "///":
+            prev_is_comment = True
+
+        elif len(line.lstrip()) == 0:
+            i += 1
+            continue
+
+        else:
+            prev_is_comment = False
+
+        i += 1
+
+
 docs_fixers = [
     javadoc_to_slashes,
-    comment_tags
+    comment_tags,
+    comment_before_public
 ]

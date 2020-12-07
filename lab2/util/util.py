@@ -309,6 +309,7 @@ def read_until_newline(data):
 
         else:
             return res
+    return res
 
 
 def remove_star_in_line(line):
