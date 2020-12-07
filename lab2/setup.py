@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="Swift-CCF-Kravchuk",
-    version="0.0.2",
+    version="0.0.3",
     author="Kravchuk Pavlo",
     author_email="pashanoy@gmail.com",
     description="A swift code convention fixer",
