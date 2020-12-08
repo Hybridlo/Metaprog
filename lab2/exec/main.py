@@ -79,6 +79,8 @@ def scan_and_fix_file(filepath, outname):
         with open(filepath, "w") as outfile:
             outfile.write(data)
 
+    return filepath
+
 
 def final_fix(filepath):
     """Apply global changes"""
@@ -107,7 +109,7 @@ def main():
         if not file.exists():
             raise FileNotFoundError("File not found")
 
-        scan_and_fix_file(file, outname)
+        file = scan_and_fix_file(file, outname)
 
         final_fix(file)
 
