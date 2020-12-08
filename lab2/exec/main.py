@@ -50,12 +50,6 @@ def scan_and_fix_file(filepath, outname):
         if verify == None and fixing == None:
             return
 
-        for fixer in source_fixers:
-            possible_new_filename = fixer(
-                verify, fixing, filepath, data, filepath.stem)
-            if possible_new_filename != None:
-                new_filename = possible_new_filename
-
         for fixer in naming_fixers:
             changed_data = fixer(verify, fixing, filepath, data)
             if changed_data != None:
@@ -65,6 +59,12 @@ def scan_and_fix_file(filepath, outname):
             changed_data = fixer(verify, fixing, filepath, data)
             if changed_data != None:
                 data = changed_data
+
+        for fixer in source_fixers:
+            possible_new_filename = fixer(
+                verify, fixing, filepath, data, filepath.stem)
+            if possible_new_filename != None:
+                new_filename = possible_new_filename
 
         if verify != None:
             verify.close()
@@ -83,6 +83,10 @@ def scan_and_fix_file(filepath, outname):
 def final_fix(filepath):
     """Apply global changes"""
     data = ""
+
+    if not filepath.exists():
+        print(f"{filepath} was not found, skipping")
+        return
 
     with open(filepath, "r") as infile:
         data = infile.read()
